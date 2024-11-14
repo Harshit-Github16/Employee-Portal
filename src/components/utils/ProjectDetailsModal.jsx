@@ -305,7 +305,9 @@ function getColor(index){
                 {project.resources.map((resource, index) => (
                   <div key={index} style={{ marginBottom: "8px" }}>
                     <Typography variant="body1">
-                      Assigned To: {resource.assignedTo}
+                      Assigned To: {resource?.assignedTo.map((user)=>{
+                        return user?.label
+                      })}
                     </Typography>
                     <Typography variant="body1">
                       Number of Resources: {resource.numberOfResources}
