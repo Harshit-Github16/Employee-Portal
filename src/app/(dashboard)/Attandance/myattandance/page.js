@@ -33,7 +33,7 @@ export default function AttendancePage() {
 
       setAttendances(response.data.attendances || [])
     } catch (error) {
-      console.error('Error fetching data:', error)
+      console.error(error)
     }
   }
 
@@ -185,7 +185,7 @@ export default function AttendancePage() {
             <Typography variant="body1">Total Absent: 5</Typography>
           </div>
           <div className="text-sm font-semibold text-gray-700">
-            <Typography variant="body1">Total Work: 25 Hours</Typography>
+            <Typography variant="body1">Total Work: 25/75 Hours</Typography>
           </div>
           <div className="text-sm font-semibold text-gray-700">
             <Typography variant="body1">Total Week: 7</Typography>

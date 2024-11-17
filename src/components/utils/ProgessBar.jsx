@@ -51,7 +51,7 @@ export default function ProgressBar() {
       }));
       Setattandancedata(updatedAttendance);
     } catch (error) {
-      console.error('Error fetching attendance data:', error);
+      console.error(error);
     }
   };
 

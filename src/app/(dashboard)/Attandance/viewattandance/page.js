@@ -31,10 +31,9 @@ export default function AttendancePage() {
       const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {}
       const url = `https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/totalDuration?startDate=${start}&endDate=${end}&userId=${employeeId}`
       const response = await axios.get(url, { headers })
-      
       setAttendances(response.data.attendances || [])
     } catch (error) {
-      console.error('Error fetching data:', error)
+      console.error(error)
     }
   }
 
@@ -44,7 +43,6 @@ export default function AttendancePage() {
       const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {}
       const url = `https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/getEmployee`
       const response = await axios.get(url, { headers })
-      
       setEmployees(response.data.data || [])
     } catch (error) {
       console.error('Error fetching employee data:', error)
@@ -63,9 +61,10 @@ export default function AttendancePage() {
       </Typography>
       
       <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4 mb-6">
-        <FormControl className="w-full md:w-auto">
+        <FormControl className="w-25">
           <InputLabel>Select Employee</InputLabel>
           <Select
+          className=''
             value={selectedEmployee}
             onChange={(e) => setSelectedEmployee(e.target.value)}
             label="Select Employee"
@@ -100,7 +99,7 @@ export default function AttendancePage() {
         />
         
         <Button type="submit" variant="contained" color="primary" className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">
-          Submit
+          View
         </Button>
       </form>
 

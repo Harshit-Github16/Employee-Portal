@@ -144,7 +144,9 @@ const ProjectDetailsModal = ({ open, onClose, project }) => {
   const [activeBtn, setActiveBtn] = useState(0);
  
   const renderAgreement = (agreement) => (
+    
     <Grid container spacing={1} key={agreement.name}>
+     
       <Grid item xs={6}>
         <Typography variant="body1">{agreement.name}:</Typography>
       </Grid>

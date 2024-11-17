@@ -500,6 +500,7 @@ export default function ProjectForm() {
         contactNumber: projectData.contactNumber,
         firstTalkDate: firstTalk,  // Now in YYYY-MM-DD format
         sendEmail: projectData.sendEmail,
+        sendWhatsApp:project.sendWhatsApp
       });
     }
   };
@@ -525,7 +526,7 @@ export default function ProjectForm() {
   const handleSubmit1 = async (e) => {
     e.preventDefault();
     if (!formData.projectName) {
-      alert("Project Name is required");
+      // alert("Project Name is required");
       return;
     }
 
@@ -602,7 +603,7 @@ export default function ProjectForm() {
             <Grid item xs={12}>
               <InputLabel id="select-project-label">
                 Select Existing Project
-              </InputLabel>assignedTo
+              </InputLabel>
               <Select
                 labelId="select-project-label"
                 fullWidth
@@ -912,20 +913,18 @@ export default function ProjectForm() {
                         variant="contained"
                         color="success"
                         type="submit"
-                        onClick={() => {
-                          // Check if the checkbox is checked
-                          console.log("Checkbox checked:", checked);  // Debugging line
-                          if (checked) {
-                            setIsInterested(2); // Call the method if checked
-                            console.log("Method executed successfully!");  // Debugging line
-                          } else {
-                            alert("Please agree to the terms before proceeding.");
-                          }
+                        onClick={(e) => {
+                          setIsInterested(
+                            !formData.agreements.msa.checked ||
+                              !formData.agreements.dsa.checked ||
+                              !formData.agreements.nonSolicitation.checked
+                              ? 1
+                              : 2
+                          );
                         }}
                       >
                         Next
                       </Button>
-
                     </Grid>
                   </Grid>
                 </>
@@ -940,17 +939,17 @@ export default function ProjectForm() {
                       {formData.resources.map((resource, index) => (
                         <Grid container key={index} spacing={2} sx={{ mb: 3, p: 2, borderRadius: 2, boxShadow: 1, bgcolor: 'grey.50' }}>
                           {Object.entries(resource).map(([field, value]) => {
-                            if(field == "assignedTo2"){
+                            if (field == "assignedTo2") {
                               return (
                                 <Grid item xs={12} sm={6} key={field}>
-                                  <MultipleSelectChip assignTo={setChipValue} isMultiChips={false}/>
+                                  <MultipleSelectChip assignTo={setChipValue} isMultiChips={false} />
                                 </Grid>
                               );
                             }
                             else if (field == "assignedTo") {
                               return (
                                 <Grid item xs={12} sm={6} key={field}>
-                                  <MultipleSelectChip assignTo={setChipValue} isMultiChips={true}/>
+                                  <MultipleSelectChip assignTo={setChipValue} isMultiChips={true} />
                                 </Grid>
                               );
                             } else {
@@ -979,7 +978,7 @@ export default function ProjectForm() {
                                     }}
                                   />
                                 </Grid>
-                                
+
                               );
                             }
                           })}

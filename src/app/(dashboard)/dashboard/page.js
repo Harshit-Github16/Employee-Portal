@@ -1,5 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
+import { Cake, Gift, PartyPopper } from 'lucide-react'
+
 import { 
   Card, 
   CardContent, 
@@ -149,7 +151,7 @@ const EmployeeDashboard = () => {
     { id: 1, name: 'Alice Johnson', startDate: '2023-10-20', endDate: '2023-10-25' },
     { id: 2, name: 'Bob Brown', startDate: '2023-10-28', endDate: '2023-10-30' },
   ];
-
+  const birthdayPerson= "Vijay"
   return (
 
     
@@ -157,7 +159,7 @@ const EmployeeDashboard = () => {
 
 
       {/* Welcome Card */}
-      <Card  className='w-100' sx={{ 
+      {/* <Card  className='w-100' sx={{ 
       
   mb: 3, 
   background: 'linear-gradient(135deg, #4caf50 30%, #81c784 90%)', // Green gradient
@@ -176,8 +178,63 @@ const EmployeeDashboard = () => {
       Here's what's happening in your workplace today:
     </Typography>
   </CardContent>
-</Card>
+</Card> */}
 
+<div className="p-6 space-y-6 md:space-y-0 md:flex md:gap-6">
+
+        <Card className='d-flex p-5 w-100 justify-between' sx={{
+          mb: 3,
+          background: 'linear-gradient(135deg, #4caf50 30%, #81c784 90%)', // Green gradient
+          color: 'white',
+          boxShadow: 3, // Add some shadow for depth
+          borderRadius: 2, // Rounded corners
+        }}>
+                  {/* Welcome Card */}
+          <Card className='h-[100%]'
+          sx={{
+            mb: 3,
+            background: 'linear-gradient(135deg, #ff7e5f 30%, #feb47b 90%)', // Purple to Blue gradient
+            color: 'white',
+            boxShadow: 3,
+            borderRadius: 2,
+            padding: 2,
+          }}
+          >
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Welcome {employeeName}! 👋
+              </Typography>
+              <Typography variant="subtitle1">
+                Here's what's happening in your workplace today:
+              </Typography>
+            </CardContent>
+          </Card>
+
+          {/* Birthday Card */}
+          <Card className="w-full md:w-1/2 overflow-hidden">
+            <CardContent className="p-6 relative bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+              <div className="absolute top-0 right-0 p-4">
+                <Cake className="w-12 h-12 text-yellow-300" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">
+                🎉 Happy Birthday, {birthdayPerson}! 🎂
+              </h2>
+              <p className="text-lg mb-4">
+                Wishing you a fantastic day filled with joy and laughter!
+              </p>
+              <div className="flex items-center  mt-4">
+                <Gift className="w-6 h-6 text-red mb-4 me-3" />
+                <p className="text-sm">
+                  Don't forget to grab your birthday treat from the break room!
+                </p>
+              </div>
+              <div className="absolute bottom-0 right-0 p-4">
+                <PartyPopper className="w-12 h-12 text-yellow-300" />
+              </div>
+            </CardContent>
+          </Card>
+        </Card>
+      </div>
 
       {/* Password Change Dialog */}
       <Dialog open={showPasswordModal} onClose={() => setShowPasswordModal(false)}>
