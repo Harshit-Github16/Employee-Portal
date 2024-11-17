@@ -1,14 +1,17 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
+import { Cake, Gift, PartyPopper } from 'lucide-react'
+// import { C Typography } from "@/components/ui/card"
+
+import {
+  Card,
+  CardContent,
   CardHeader,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  
+
   Button,
   Dialog,
   DialogContent,
@@ -133,10 +136,13 @@ const EmployeeDashboard = () => {
     { id: 2, name: 'Bob Brown', startDate: '2023-10-28', endDate: '2023-10-30' },
   ];
 
+
+  const birthdayPerson = "Sarah"
+
   return (
     <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
       {/* Welcome Card */}
-      <Card sx={{ 
+      {/* <Card sx={{ 
   mb: 3, 
   background: 'linear-gradient(135deg, #4caf50 30%, #81c784 90%)', // Green gradient
   color: 'white',
@@ -152,7 +158,91 @@ const EmployeeDashboard = () => {
     </Typography>
   </CardContent>
 </Card>
+<Card className="w-full md:w-1/2 bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg overflow-hidden">
+        <CardContent className="p-6 relative">
+          <div className="absolute top-0 right-0 p-4">
+            <Cake className="w-12 h-12 text-yellow-300" />
+          </div>
+          <Typography variant="h5" className="font-bold mb-2">
+            🎉 Happy Birthday, {birthdayPerson}! 🎂
+          </Typography>
+          <Typography variant="subtitle1" className="mb-4">
+            Wishing you a fantastic day filled with joy and laughter!
+          </Typography>
+          <div className="flex items-center space-x-4 mt-4">
+            <Gift className="w-6 h-6" />
+            <Typography variant="body2">
+              Don't forget to grab your birthday treat from the break room!
+            </Typography>
+          </div>
+          <div className="absolute bottom-0 left-0 p-4">
+            <PartyPopper className="w-12 h-12 text-yellow-300" />
+          </div>
+        </CardContent>
+      </Card> */}
 
+      <div className="p-6 space-y-6 md:space-y-0 md:flex md:gap-6">
+
+        <Card className='d-flex p-5 w-100 justify-between' sx={{
+          mb: 3,
+          background: 'linear-gradient(135deg, #4caf50 30%, #81c784 90%)', // Green gradient
+          color: 'white',
+          boxShadow: 3, // Add some shadow for depth
+          borderRadius: 2, // Rounded corners
+        }}>
+                  {/* Welcome Card */}
+          <Card 
+          // sx={{
+          //   mb: 3,
+          //   background: 'linear-gradient(135deg, #4caf50 30%, #81c784 90%)', // Green gradient
+          //   color: 'white',
+          //   boxShadow: 3, // Add some shadow for depth
+          //   borderRadius: 2, // Rounded corners
+          // }}
+          sx={{
+            mb: 3,
+            background: 'linear-gradient(135deg, #ff7e5f 30%, #feb47b 90%)', // Purple to Blue gradient
+            color: 'white',
+            boxShadow: 3,
+            borderRadius: 2,
+            padding: 2,
+          }}
+          >
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Welcome {employeeName}! 👋
+              </Typography>
+              <Typography variant="subtitle1">
+                Here's what's happening in your workplace today:
+              </Typography>
+            </CardContent>
+          </Card>
+
+          {/* Birthday Card */}
+          <Card className="w-full md:w-1/2 overflow-hidden">
+            <CardContent className="p-6 relative bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+              <div className="absolute top-0 right-0 p-4">
+                <Cake className="w-12 h-12 text-yellow-300" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">
+                🎉 Happy Birthday, {birthdayPerson}! 🎂
+              </h2>
+              <p className="text-lg mb-4">
+                Wishing you a fantastic day filled with joy and laughter!
+              </p>
+              <div className="flex items-center  mt-4">
+                <Gift className="w-6 h-6 text-red mb-4 me-3" />
+                <p className="text-sm">
+                  Don't forget to grab your birthday treat from the break room!
+                </p>
+              </div>
+              <div className="absolute bottom-0 right-0 p-4">
+                <PartyPopper className="w-12 h-12 text-yellow-300" />
+              </div>
+            </CardContent>
+          </Card>
+        </Card>
+      </div>
 
       {/* Password Change Dialog */}
       <Dialog open={showPasswordModal} onClose={() => setShowPasswordModal(false)}>
@@ -222,7 +312,7 @@ const EmployeeDashboard = () => {
                     <ListItemIcon>
                       <DotIcon sx={{ color: getPriorityColor(update.priority) }} />
                     </ListItemIcon>
-                    <ListItemText 
+                    <ListItemText
                       primary={update.message}
                       secondary={`Priority: ${update.priority.charAt(0).toUpperCase() + update.priority.slice(1)}`}
                     />
@@ -272,10 +362,10 @@ const EmployeeDashboard = () => {
         </Grid>
       </Grid>
 
-  <Grid>
-  {/* <TimerComponent/> */}
-  <Tester/>
-  </Grid>
+      <Grid>
+        {/* <TimerComponent/> */}
+        <Tester />
+      </Grid>
 
       <Grid container spacing={3}>
         {/* Employee List */}
