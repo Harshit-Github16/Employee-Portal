@@ -50,8 +50,8 @@ const EmployeeDashboard = () => {
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const userDetails = JSON.parse(localStorage.getItem('userDetails') || '{}');
   const [updateFilter, setUpdateFilter] = useState('all');
-  const employeeName = userDetails.first_name;
-
+  const employeeName = userDetails.firstName
+ console.log("userDetails", userDetails)
   useEffect(() => {
     if (userDetails.isFirstLogin) {
       setShowPasswordModal(true);
@@ -122,6 +122,23 @@ const EmployeeDashboard = () => {
     'Team meeting on Friday at 3 PM.',
     'Project deadline extended by one week.',
   ];
+  const marqueeStyle = {
+    display: 'inline-block',
+    whiteSpace: 'nowrap',
+    animation: 'scroll-text 10s linear infinite', // Adjust speed with 10s
+  };
+  
+  // Keyframes for scrolling effect
+  const scrollTextAnimation = `
+    @keyframes scroll-text {
+      0% {
+        transform: translateX(100%); /* Start from right */
+      }
+      100% {
+        transform: translateX(-100%); /* End at left */
+      }
+    }
+  `;
 
   const projects = [
     { id: 1, name: 'Project A', startDate: '2023-01-01', endDate: '2023-12-31', assignedTo: 'John Doe', status: 'In Progress' },
@@ -134,15 +151,23 @@ const EmployeeDashboard = () => {
   ];
 
   return (
+
+    
     <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+
+
       {/* Welcome Card */}
-      <Card sx={{ 
+      <Card  className='w-100' sx={{ 
+      
   mb: 3, 
   background: 'linear-gradient(135deg, #4caf50 30%, #81c784 90%)', // Green gradient
   color: 'white',
   boxShadow: 3, // Add some shadow for depth
   borderRadius: 2, // Rounded corners
 }}>
+
+
+  
   <CardContent>
     <Typography variant="h5" gutterBottom>
       Welcome {employeeName}! 👋
@@ -191,90 +216,123 @@ const EmployeeDashboard = () => {
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {/* Important Updates */}
-        <Grid item xs={12} md={8}>
-          <Card>
-            <CardHeader
-              title={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CampaignIcon sx={{ color: '#d32f2f' }} />
-                  <Typography variant="h6">Important Updates</Typography>
-                  <FormControl size="small" sx={{ ml: 'auto', minWidth: 120 }}>
-                    <InputLabel>View As</InputLabel>
-                    <Select
-                      value={updateFilter}
-                      label="View As"
-                      onChange={(e) => setUpdateFilter(e.target.value)}
-                    >
-                      <MenuItem value="all">All Updates</MenuItem>
-                      <MenuItem value="employee">Employee</MenuItem>
-                      <MenuItem value="admin">Admin</MenuItem>
-                      <MenuItem value="manager">Manager</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-              }
-              sx={{ bgcolor: '#ffebee' }}
-            />
-            <CardContent>
-              <List>
-                {importantUpdates[updateFilter].map((update, index) => (
-                  <ListItem key={index} sx={{ py: 0.5 }}>
-                    <ListItemIcon>
-                      <DotIcon sx={{ color: getPriorityColor(update.priority) }} />
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary={update.message}
-                      secondary={`Priority: ${update.priority.charAt(0).toUpperCase() + update.priority.slice(1)}`}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        </Grid>
+    <Grid item xs={12} md={8}>
+      <Card>
+      <Tester/>
+      </Card>
+   {/* <Tester/> */}
+  </Grid>
 
         {/* Attendance Pie Chart */}
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardHeader
-              title={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <PeopleIcon sx={{ color: '#1976d2' }} />
-                  <Typography variant="h6">Employee Attendance</Typography>
-                </Box>
+        <Grid item xs={12}  md={4}>
+  <Card>
+    {/* CardHeader for Important Updates */}
+    <CardHeader
+      title={
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CampaignIcon sx={{ color: '#d32f2f' }} />
+          <Typography variant="h6">Important Updates</Typography>
+          <FormControl size="small" sx={{ ml: 'auto', minWidth: 120 }}>
+            <InputLabel>View As</InputLabel>
+            <Select
+              value={updateFilter}
+              label="View As"
+              onChange={(e) => setUpdateFilter(e.target.value)}
+            >
+              <MenuItem value="all">All Updates</MenuItem>
+              <MenuItem value="employee">Employee</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+              <MenuItem value="manager">Manager</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+      }
+      sx={{ bgcolor: '#ffebee' }}
+    />
+
+    {/* CardContent for Important Updates */}
+    <CardContent>
+  <List sx={{ padding: 0 }}>
+    {/* Vertical Scrolling Animation */}
+    <style>{`
+      @keyframes scroll-text {
+        0% {
+          transform: translateY(100%); /* Start from bottom */
+        }
+        100% {
+          transform: translateY(-100%); /* End at top */
+        }
+      }
+      .marquee-vertical {
+        display: inline-block;
+        animation: scroll-text 8s linear infinite; /* Adjust speed with 8s */
+      }
+    `}</style>
+    <Box sx={{ height: 200, overflow: 'hidden' }}> {/* Reduced height to 200px */}
+      <div className="marquee-vertical">
+        {importantUpdates[updateFilter].map((update, index) => (
+          <ListItem key={index} sx={{ py: 0.5 }} className="flex items-center space-x-3">
+            <ListItemIcon>
+              <DotIcon sx={{ color: getPriorityColor(update.priority) }} />
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <span className="text-left font-medium text-sm"> {/* Text alignment and font styles */}
+                  {update.message}
+                </span>
               }
-              sx={{ bgcolor: '#e3f2fd' }}
+              secondary={
+                <span className="text-xs text-gray-500"> {/* Smaller secondary text */}
+                  Priority: {update.priority.charAt(0).toUpperCase() + update.priority.slice(1)}
+                </span>
+              }
             />
-            <CardContent>
-              <Box sx={{ height: 200 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={attendanceData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={45}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {attendanceData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+          </ListItem>
+        ))}
+      </div>
+    </Box>
+  </List>
+</CardContent>
+
+   <div className='h-[249px]'>
+     {/* CardHeader for Notices */}
+     <CardHeader
+      title={
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <NotificationsIcon sx={{ color: '#ffa726' }} />
+          <Typography variant="h6">Notices</Typography>
+        </Box>
+      }
+      sx={{ bgcolor: '#fff3e0' }}
+    />
+
+    {/* CardContent for Notices */}
+    <CardContent sx={{ maxHeight: 250, overflow: 'auto' }}> {/* Reduced height for Notices */}
+      <div className='marquee-vertical'>
+      <List sx={{ padding: 0 }}>
+        {notices.map((notice, index) => (
+          <ListItem key={index}>
+            <ListItemIcon>
+              <DotIcon sx={{ color: '#ffa726', fontSize: 12 }} />
+            </ListItemIcon>
+            <ListItemText primary={notice} />
+          </ListItem>
+        ))}
+      </List>
+      </div>
+ 
+    </CardContent>
+   </div>
+  </Card>
+</Grid>
+
+
+        
       </Grid>
 
   <Grid>
   {/* <TimerComponent/> */}
-  <Tester/>
+  {/* <Tester/> */}
   </Grid>
 
       <Grid container spacing={3}>
@@ -316,7 +374,7 @@ const EmployeeDashboard = () => {
         </Grid>
 
         {/* Notices */}
-        <Grid item xs={12} md={4}>
+        {/* <Grid item xs={12} md={4}>
           <Card>
             <CardHeader
               title={
@@ -339,6 +397,44 @@ const EmployeeDashboard = () => {
                 ))}
               </List>
             </CardContent>
+          </Card>
+        </Grid> */}
+         <Grid item xs={12} md={4}>
+          <Card className=''>
+         <div className='h-[375px]'>
+         <CardHeader
+              title={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <PeopleIcon sx={{ color: '#1976d2' }} />
+                  <Typography variant="h6">Employee Attendance</Typography>
+                </Box>
+              }
+              sx={{ bgcolor: '#e3f2fd' }}
+            />
+            <CardContent>
+              <Box sx={{ height: 200 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={attendanceData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {attendanceData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Box>
+            </CardContent>
+         </div>
           </Card>
         </Grid>
 

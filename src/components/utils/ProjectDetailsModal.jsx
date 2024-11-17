@@ -327,7 +327,7 @@ function getColor(index){
                 ))}
               </div>
             ) : progressStep == 2 ? (
-              <ProgressCard heading='Plaining' />
+              <ProgressCard heading='Planning' />
             ) : progressStep == 3 ? (
               <ProgressCard heading='Running' />
             ) : progressStep == 4 ? (

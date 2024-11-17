@@ -257,10 +257,24 @@ import React, { useState, useEffect } from 'react';
 import { checkInEmployee, checkOutEmployee } from '@/_services/services_api';
 import Tooltip from '@mui/material/Tooltip';
 import { 
-     
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Paper, 
+  Alert, 
+  AlertTitle
+
+    
+    
+    
+   
+
+
+   
   
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
-    Paper 
 } from "@mui/material";
 import axios from 'axios';
 import Dialog from '@mui/material/Dialog';
@@ -275,6 +289,9 @@ import Checkbox from '@mui/material/Checkbox';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
+import { styled } from '@mui/system';
+
+
 export default function Dashboard() {
     const [isCheckedIn, setIsCheckedIn] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -289,11 +306,11 @@ export default function Dashboard() {
     const [inputDate, setInputDate] = useState('');
     const [inputHours, setInputHours] = useState('');
     const [selectedProject, setSelectedProject] = useState('');
-    const [projects, setProjects] = useState([
-        { name: "Project Alpha", hours: '', confirmed: false },
-        { name: "Project Beta", hours: '', confirmed: false },
-        { name: "Project Gamma", hours: '', confirmed: false },
-    ]);
+    // const [projects, setProjects] = useState([
+    //     { name: "Project Alpha", hours: '', confirmed: false },
+    //     { name: "Project Beta", hours: '', confirmed: false },
+    //     { name: "Project Gamma", hours: '', confirmed: false },
+    // ]);
     const [isConfirmed, setIsConfirmed] = useState(false);
 
 
@@ -481,6 +498,43 @@ console.log("")
         setProjects(projects.map((project) => ({ ...project, hours: '', confirmed: false })));
         // Additional check-out logic goes here
     };
+    // const confirmCheckOut = async () => {
+    //     try {
+    //         // Retrieve auth token from local storage
+    //         const authToken = localStorage.getItem('auth-token');
+    //         if (!authToken) {
+    //             alert("Auth token is missing. Please log in again.");
+    //             return;
+    //         }
+
+    //         // Make the API call for each project
+    //         const promises = payload.map((data) =>
+    //             axios.post('https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/createDetails', data, {
+    //                 headers: {
+    //                     'auth-token': authToken,
+    //                     'Content-Type': 'application/json',
+    //                 },
+    //             })
+    //             .then((response) => {
+    //                 console.log("Response for project:", data.projectId, response.data);
+    //             })
+    //             .catch((error) => {
+    //                 console.error("Error in API call for project:", data.projectId, error.response || error.message);
+    //                 alert(`Failed to check out project ${data.projectId}. Please try again.`);
+    //             })
+    //         );
+    
+    //         // Wait for all API calls to complete
+    //         await Promise.all(promises);
+    
+    //         // Close modal and show success message if needed
+    //         handleCloseModal();
+    //         alert("Check-out confirmed successfully!");
+    //     } catch (error) {
+    //         console.error("Error confirming check-out:", error);
+    //         alert("Failed to confirm check-out. Please try again.");
+    //     }
+    // };
 
     const handleWeekChange = (direction) => {
         const newWeek = selectedWeek + direction;
@@ -521,7 +575,22 @@ console.log("")
                 i === index ? { ...project, [field]: value } : project
             )
         );
+        const newData = [...getprojectdata]; // Copy the state to avoid mutation
+        newData[index] = {
+          ...newData[index], 
+          [field]: value // Update the specific field
+        };
+        setgetprojectdata(newData);
     };
+
+    const handleCheckboxChange = (index, checked) => {
+        const newData = [...getprojectdata];
+        newData[index] = {  
+          ...newData[index],
+          confirmed: checked, // Update the confirmed field
+        };
+        setgetprojectdata(newData); // Update the state
+      };
    const getDayProgressBars = (attendances) => {
     const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return daysOfWeek.map((day, index) => {
@@ -534,7 +603,7 @@ console.log("")
     
                 {/* Tooltip Wrapper */}
                 <Tooltip title={attendance ? attendance.totalDuration : "00:00:00"} arrow>
-                    <div className=" w-[70%] h-2 bg-gray-200 rounded-full relative">
+                    <div className=" w-[50%] h-2 bg-gray-200 rounded-full relative">
                         <div
                             className="h-full rounded-full"
                             style={{
@@ -553,16 +622,185 @@ console.log("")
     });
 };
 
-    
+const [projectdata,setprojectdata]=useState([]);
+    const getuserproject = async () => {
+        try {
+            const authToken = localStorage.getItem('auth-token');
+            const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+            const url = `https://1pqbgqn7-4000.inc1.devtunnels.ms/admin/projectDetails/getUserProjects`;
+            const response = await axios.get(url, { headers });
+            setprojectdata(response.data.projects)
+            console.log("responsrespons:",response)
+
+        } catch (error) {
+            console.error("Error fetching attendance data:", error);
+        }
+    };
+useEffect(()=>{
+    getuserproject();
+},[]) 
+
+const [getprojectdata, setgetprojectdata] = useState(
+    projectdata.map((project) => ({
+      hour: '', // Initially empty
+      update: '', // Initially empty
+      confirmed: project._id, // Checkbox state
+    }))
+  );
+console.log("check:",getprojectdata)
+  const handlecheckout = async (e) => {
+    e.preventDefault();
+  
+    // Get the current date and time in ISO 8601 format (e.g., 2024-11-15T09:00:00Z)
+    const currentDate = new Date().toISOString(); // This gives the current date and time in the required format
+  
+    // Prepare the projects array with the required format
+
+    const projectsToSend = getprojectdata
+      .filter((project) => project.confirmed) // Only include confirmed projects
+      .map((project) => ({
+
+        projectId: project.id, // The unique ID of the project
+        Update: project.update || '', // The update entered for the project (e.g., "Checked in")
+        time: project.hour || '', // The working hours entered for the project
+      }));
+  
+  
+    const dataToSend = {
+      date: currentDate,  // Current date and time in ISO format
+      projects: projectsToSend,  // Array of projects with projectId, Update, and time
+    };
+    const authToken = localStorage.getItem('auth-token');
+    console.log('Auth Token:', authToken); 
+    try {
+      // Make the POST request using axios
+      const response = await axios.post(
+        'https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/createDetails',
+        dataToSend, // The body of the request
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'auth-token': authToken, // Add the auth token in headers
+          },
+        }
+      );
+  
+      // Handle the response from the API
+      console.log(response.data); // This will log the data returned by the server
+    } catch (error) {
+      console.error('Error submitting data:', error);
+    }
+  };
+  
+  console.log("check:",getprojectdata)
+
+
+
+
+
+
+
+
+ // Dummy project data
+
+// Dummy project data
+const dummyProjects = [
+  { id: "6735f41e6acc344492a4b0bc", name: "Project A" },
+  { id: "673600d2dca766ad6e3f3b67", name: "Project B" },
+  { id: "673600e9dca766ad6e3f3b68", name: "Project C" },
+];
+
+const CHECKOUT_TIME = 7; // 7 hours
+
+const StyledTableContainer = styled(TableContainer)({
+  marginBottom: '1rem',
+});
+
+const StyledButton = styled(Button)({
+  marginTop: '1rem',
+  width: '100%',
+});
+ // Dummy project data
+ const [projects, setProjects] = useState(dummyProjects.map(project => ({
+  projectId: project.id,
+  name: project.name,
+  time: "",
+  Update: ""
+})));
+
+const [formData, setFormData] = useState({
+  date: new Date().toISOString().split('T')[0],
+  projects: []
+});
+
+const [totalHours, setTotalHours] = useState(0);
+const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+const [showErrorAlert, setShowErrorAlert] = useState(false);
+const [alertMessage, setAlertMessage] = useState('');
+const [times, setTimes] = useState([{ time: "" }]);
+const handleInputChange = (index, field, value) => {
+  setProjects(prevProjects => {
+    const updatedProjects = [...prevProjects];
+    updatedProjects[index] = { ...updatedProjects[index], [field]: value };
+    return updatedProjects;
+  });
+};
+
+useEffect(() => {
+  const total = projects.reduce((sum, project) => {
+    const hours = parseFloat(project.time) || 0;
+    return sum + hours;
+  }, 0);
+  setTotalHours(total);
+}, [projects]);
+
+const confirmCheckOut1 = async (e) => {
+  e.preventDefault();
+  setShowSuccessAlert(false);
+  setShowErrorAlert(false);
+  setAlertMessage('');
+
+  if (totalHours <= CHECKOUT_TIME) {
+    const submittedData = {
+      date: formData.date,
+      projects: projects.map(({ projectId, time, Update }) => ({
+        projectId,
+        time,
+        Update
+      }))
+    };
+
+    try {
+      const authToken = localStorage.getItem('auth-token');
+      const response = await axios.post(
+        'https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/createDetails',
+        submittedData,
+        {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log("API Response:", response.data);
+      setFormData(submittedData);
+      setShowSuccessAlert(true);
+      setAlertMessage('Your time entries have been submitted successfully!');
+    } catch (error) {
+      console.error('API call failed:', error);
+      setShowErrorAlert(true);
+      setAlertMessage('Failed to submit time entries. Please try again.');
+    }
+  } else {
+    setShowErrorAlert(true);
+    setAlertMessage(`Total working hours exceed the checkout time of ${CHECKOUT_TIME} hours. Please adjust your entries.`);
+  }
+};
 
     return (
         <div className="p-5 w-full mx-auto">
             <div className="flex items-center justify-between mb-6">
-                <input
-                    type="text"
-                    placeholder="Add notes for check-in"
-                    className="border p-2 rounded-lg w-1/2"
-                />
                 <span className="text-gray-500"> <span className='mb-2 text-md font-semibold  '>  Employee Working Time : </span> {formatTime(elapsedTime)}</span>
                 <button
                     onClick={handleCheckInOut}
@@ -570,75 +808,123 @@ console.log("")
                 >
                     {isCheckedIn ? 'Check-Out' : 'Check-In'} {new Date(currentTime).toLocaleTimeString()}
                 </button>
-                <Dialog open={isModalOpen} onClose={handleCloseModal} maxWidth="lg" fullWidth>
-    <DialogTitle className="text-center text-2xl font-semibold text-gray-800 border-b border-gray-200 py-4">
-        Check-Out Confirmation
-    </DialogTitle>
+                  <Dialog open={isModalOpen} onClose={handleCloseModal} maxWidth="lg" fullWidth>
+              <DialogTitle className="text-center text-2xl font-semibold text-gray-800 border-b border-gray-200 py-4">
+                  Check-Out Confirmation
+              </DialogTitle>
+              {/* <form onSubmit={handlecheckout}> */}
     <DialogContent className="py-4">
-        <Typography className="text-gray-700 text-center mb-6" variant="h6">
-            Current Date: {new Date().toLocaleDateString()}
-        </Typography>
+      <Typography className="text-gray-700 text-center mb-6" variant="h6">
+        Current Date: {new Date().toLocaleDateString()}
+        <br />
+        CheckOut Time: {formatTime(elapsedTime)}
+      </Typography>
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '1rem' }}>
+      <form onSubmit={confirmCheckOut1}>
+     
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell colSpan={3}>
+                  Checkout Time: {CHECKOUT_TIME} hours
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Project Name</TableCell>
+                <TableCell>Working Hours</TableCell>
+                <TableCell>Update</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {projectdata.map((project, index) => (
+                <TableRow key={project.projectId}>
+                  <TableCell>{project.projectName}</TableCell>
+                  <TableCell>
+                    <TextField
+                      type="number"
+                      inputProps={{ step: "0.01" }}
+                      placeholder="Hours"
+                      onChange={(e) => handleInputChange(index, 'time', e.target.value)}
+                      fullWidth
+                    />
+               
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                     
+                      placeholder="Enter your update here"
+                   type='text'
+                      onChange={(e) => handleInputChange(index, 'Update', e.target.value)}
+                      fullWidth
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <TableRow>
+              <TableCell colSpan={3} align="right">
+                Total Hours: {totalHours.toFixed(2)}
+              </TableCell>
+            </TableRow>
+          </Table>
+   
+        <StyledButton 
+          type="submit" 
+          variant="contained" 
+          color="primary"
+        >
+          Confirm Check-Out
+        </StyledButton>
+      </form>
+      
+      {showSuccessAlert && (
+        <Alert severity="success" style={{ marginTop: '1rem' }}>
+          <AlertTitle>Success</AlertTitle>
+          {alertMessage}
+        </Alert>
+      )}
 
-        <TableContainer component={Paper} className="shadow-lg rounded-lg overflow-hidden">
-            <Table className="min-w-full">
-                <TableHead>
-                    <TableRow className="bg-gray-100">
-                        <TableCell align="center" className="font-semibold text-gray-600 px-4 py-2">Confirm</TableCell>
-                        <TableCell align="center" className="font-semibold text-gray-600 px-4 py-2">Project Name</TableCell>
-                        <TableCell align="center" className="font-semibold text-gray-600 px-4 py-2">Working Hours</TableCell>
-                      
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {projects.map((project, index) => (
-                        <TableRow key={index} className="border-t border-gray-200">
-                            <TableCell align="center" className="px-4 py-2">
-                                <Checkbox
-                                    checked={project.confirmed}
-                                    onChange={(e) => handleProjectChange(index, 'confirmed', e.target.checked)}
-                                    color="primary"
-                                />
-                            </TableCell>
-                            <TableCell align="center" className="text-blue-600 font-semibold px-4 py-2">
-                                {project.name}
-                            </TableCell>
-                            <TableCell align="center" className="">
-                                <TextField
-                                    type="number"
-                                    placeholder="Hours"
-                                    value={project.hours}
-                                    onChange={(e) => handleProjectChange(index, 'hours', e.target.value)}
-                                    className="bg-white rounded-md w-50  text-center border border-gray-300"
-                                    
-                                />
-                            </TableCell>
-                          
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </TableContainer>
+      {showErrorAlert && (
+        <Alert severity="error" style={{ marginTop: '1rem' }}>
+          <AlertTitle>Error</AlertTitle>
+          {alertMessage}
+        </Alert>
+      )}
+
+      {formData.projects.length > 0 && (
+        <Paper style={{ marginTop: '1rem', padding: '1rem' }}>
+          <h2 style={{ marginBottom: '0.5rem' }}>Submitted Data</h2>
+          <pre style={{ whiteSpace: 'pre-wrap', backgroundColor: '#f5f5f5', padding: '0.5rem', borderRadius: '4px' }}>
+            {JSON.stringify(formData, null, 2)}
+          </pre>
+        </Paper>
+      )}
+    </div>
+
     </DialogContent>
+
     <DialogActions className="py-4 px-6">
-        <Button
-            onClick={handleCloseModal}
-            variant="outlined"
-            color="secondary"
-            className="mr-4 py-2 px-6 text-gray-700 hover:bg-gray-200 transition duration-200 ease-in-out"
-        >
-            Cancel
-        </Button>
-        <Button
-            onClick={confirmCheckOut}
-            variant="contained"
-            color="primary"
-            disabled={projects.some((project) => !project.hours || !project.confirmed)}
-            className="py-2 px-6 bg-blue-600 text-white hover:bg-blue-700 transition duration-200 ease-in-out"
-        >
-            Confirm Check-Out
-        </Button>
+      <Button
+        onClick={handleCloseModal}
+        variant="outlined"
+        color="secondary"
+        className="mr-4 py-2 px-6 text-gray-700 hover:bg-gray-200 transition duration-200 ease-in-out"
+      >
+        Cancel
+      </Button>
+      <Button
+    type="submit" // Ensure this is a submit button
+    variant="contained"
+    color="primary"
+    onClick={(e) => confirmCheckOut1(e)}
+    className="py-2 px-6 bg-blue-600 text-white hover:bg-blue-700 transition duration-200 ease-in-out"
+  >
+    Confirm Check-Out
+  </Button>
     </DialogActions>
-</Dialog>
+  {/* </form> */}
+
+          </Dialog>
 
 
 

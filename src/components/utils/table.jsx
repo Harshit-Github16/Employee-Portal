@@ -526,11 +526,12 @@ export const ProjectListTable = ({ projectData, onViewDetails, onDeleteProject, 
               <TableCell align="right">
                 <FormControl variant="outlined" size="small" fullWidth>
                   <InputLabel id="view-label">view</InputLabel>
+                  {/* {console.log("ssss",project.projectStatus)} */}
                   <Select
                     labelId="view-label"
-                    value={project.status}
+                    // value={project.projectStatus}
                     onChange={(event) => handleStatusChange(event, project)}
-                    label="Status"
+                    label={options[project.projectStatus]}
                   >
                     <MenuItem value={1}>Initial</MenuItem>
                     <MenuItem value={2}>Planning</MenuItem>
