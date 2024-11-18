@@ -290,6 +290,11 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/system';
+import { useRouter } from "next/navigation";
+
+// import { Checkbox } from "@/components/ui/checkbox"
+// import { Input } from "@/components/ui/input"
+// import { Textarea } from "@/components/ui/textarea"
 
 
 export default function Dashboard() {
@@ -369,6 +374,7 @@ export default function Dashboard() {
   };
 
   // Load saved state on component mount
+  const router =useRouter()
   useEffect(() => {
     const savedCheckInTime = localStorage.getItem('checkInTime');
     const savedCheckOutTime = localStorage.getItem('checkOutTime');
@@ -742,7 +748,7 @@ const fetchAttendanceData = async (startDate, endDate) => {
             'auth-token': authToken, // Add the auth token in headers
           },
         }
-      );
+      );  
 
       // Handle the response from the API
       console.log(response.data); // This will log the data returned by the server
@@ -906,6 +912,7 @@ useEffect(()=>{
 
         setShowSuccessAlert(true);
         setAlertMessage('Your time entries have been submitted successfully!');
+        router.push('/dashboard')
       } catch (error) {
         console.error('API call failed:', error);
         setShowErrorAlert(true);
@@ -935,8 +942,8 @@ useEffect(()=>{
           <DialogContent className="py-4">
             <Typography className="text-gray-700 text-center mb-6" variant="h6">
               Current Date: {new Date().toLocaleDateString()}
-              <br />
-              CheckOut Time:  {formatTime(elapsedTime)}
+              {/* <br /> */}
+              {/* CheckOut Time:  {formatTime(elapsedTime)} */}
             </Typography>
             <div style={{ maxWidth: '800px', margin: '0 auto', padding: '1rem' }}>
               {showSuccessAlert && (
@@ -999,15 +1006,25 @@ useEffect(()=>{
                     </TableCell>
                   </TableRow>
                 </Table> */}
+                  <Typography className="text-gray-700 text-center mb-6">
+                  <span className='w-100'>
+                       CheckOut Time: 00:12:31
+                       </span>
+                        <span className='hidden'>  Checkout Time: {totalHours1}</span>
+            </Typography>
                 <Table className="border">
                   <TableHead>
-                    <TableRow>
+                    {/* <TableRow className='w-100'>
                       <TableCell colSpan={3}>
-                        CheckOut Time: 00:12:31
+                       <span className='w-100'>
+                       CheckOut Time: 00:12:31
+                       </span>
                         <span className='hidden'>  Checkout Time: {totalHours1}</span>
                       </TableCell>
-                    </TableRow>
+                    </TableRow> */}
                     <TableRow>
+                    <TableCell>Status</TableCell>
+
                       <TableCell>Project Name</TableCell>
                       <TableCell>Working Hours</TableCell>
                       <TableCell>Update</TableCell>
@@ -1090,30 +1107,88 @@ useEffect(()=>{
               
                     ))}
 
+
+             <TableRow key={2}>
+              <TableCell>
+                <Checkbox
+                  checked={''}
+                  onCheckedChange={() => handleCheckboxChange()}
+                  aria-label={`Mark as complete`}
+                />
+              </TableCell>
+              <TableCell className="font-medium">{'tester'}</TableCell>
+              <TableCell>
+                <TextField
+                  type="number"
+                  placeholder="Hours"
+                  // value={project.time}
+                  onChange={(e) => handleTimeChange( e.target.value)}
+                  className="w-[200px]"
+                  step="0.01"
+                  min="0"
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  placeholder="Enter your update here"
+                  // value={}
+                  onChange={(e) => handleUpdateChange( e.target.value)}
+                  className="w-full"
+                />
+              </TableCell>
+            </TableRow>
+
+            <TableRow key={3}>
+              <TableCell>
+                <Checkbox
+                  checked={''}
+                  onCheckedChange={() => handleCheckboxChange()}
+                  aria-label={`Mark  as complete`}
+                />
+              </TableCell>
+              <TableCell className="font-medium">{'checker'}</TableCell>
+              <TableCell>
+                <TextField
+                  type="number"
+                  placeholder="Hours"
+                  // value={}
+                  onChange={(e) => handleTimeChange(e.target.value)}
+                  className="w-[200px]"
+                  step="0.01"
+                  min="0"
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  placeholder="Enter your update here"
+                  // value={}
+                  onChange={(e) => handleUpdateChange( e.target.value)}
+                  className="w-full"
+                />
+              </TableCell>
+            </TableRow>
+
                     {/* Total Hours row moved inside TableBody */}
                     <TableRow>
-                    <TableCell className="d-flex flex-column" align="left" style={{ padding: '16px' }}>
-  <span className="mt-1" style={{ fontWeight: '500', fontSize: '14px', marginBottom: '8px' }}>
-    Others:
-  </span>
-  <TextField
-    className="w-100"
-    placeholder="Enter your update here"
-    type="text"
-    fullWidth
-    variant="outlined"
-    style={{
-      backgroundColor: '#f5f5f5',
-      borderRadius: '4px',
-      padding: '10px',
-    }}
-  />
-</TableCell>
-                      <TableCell colSpan={3} align="right">
-                        Total Hours: {totalHours.toFixed(2)}
-                      </TableCell>
-                   
-                    </TableRow>
+            <TableCell colSpan={2}>
+              <div className="space-y-2">
+                <label htmlFor="other-update" className="font-medium text-sm">
+                  Others:
+                </label>
+                <TextField
+                  id="other-update"
+                  placeholder="Enter your update here"
+                  // value={otherUpdate}
+                  onChange={(e) => setOtherUpdate(e.target.value)}
+                  className="w-full"
+                  rows={3}
+                />
+              </div>
+            </TableCell>
+            <TableCell colSpan={2} align='right' className="fs-[20px]">
+              <div className="font-medium">Total Hours: {totalHours.toFixed(2)}</div>
+            </TableCell>
+          </TableRow>
                   </TableBody>
                 </Table>
 

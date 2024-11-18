@@ -1,7 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react';
 import Header from '@/components/Haader';
+import { Button, Menu, MenuItem } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import useRouter from 'next/router';
 import { 
   faTachometerAlt, 
   faUser, 
@@ -39,6 +41,7 @@ const attendanceDropdownOptions = [
 ];
 
 export default function RootLayout({ children }) {
+
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [currentPath, setCurrentPath] = useState('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -47,6 +50,17 @@ export default function RootLayout({ children }) {
   useEffect(() => {
     setCurrentPath(window.location.pathname);
   }, []);
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -183,11 +197,32 @@ export default function RootLayout({ children }) {
               <Header />
             </div>
             
-            <div className="flex items-center space-x-2">
+            {/* <div className="flex items-center space-x-2">
               <button className="px-4 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors duration-200">
                 Quick Action
               </button>
-            </div>
+            </div> */}
+            <div>
+      <Button
+        aria-controls={open ? 'custom-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={handleClick}
+        variant="contained"
+      >
+          Quick Action
+      </Button>
+      <Menu
+        id="custom-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+      >
+        <MenuItem onClick={handleClose}>profile</MenuItem>
+        <MenuItem onClick={handleClose}>Logout</MenuItem>
+        <MenuItem onClick={()=> router.push('/dashbord')}>Option 3</MenuItem>
+      </Menu>
+    </div>
           </div>
         </header>
 
