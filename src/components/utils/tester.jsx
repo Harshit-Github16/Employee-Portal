@@ -409,37 +409,86 @@ export default function Dashboard() {
   };
 
   // Fetch attendance data
-  const fetchAttendanceData = async (startDate, endDate) => {
-    try {
-      const authToken = localStorage.getItem('auth-token');
-      const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
-      const url = `https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/totalDuration?startDate=${startDate}&endDate=${endDate}`;
-      const response = await axios.get(url, { headers });
+//   const fetchAttendanceData = async (startDate, endDate) => {
+//     try {
+//       const authToken = localStorage.getItem('auth-token');
+//       const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+//       const url = `https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/totalDuration?startDate=${startDate}&endDate=${endDate}`;
+//       const response = await axios.get(url, { headers });
+// console.log("response.data.attendances", response.data.attendances)
+//       setAttendanceData(response.data.attendances);
 
+//       const nextWeekStartDate = new Date(endDate);
+//       nextWeekStartDate.setDate(nextWeekStartDate.getDate() + 1);
+//       const nextWeekEndDate = new Date(nextWeekStartDate);
+//       nextWeekEndDate.setDate(nextWeekEndDate.getDate() + 6);
+
+//       const nextStartDate = nextWeekStartDate.toISOString().split('T')[0];
+//       const nextEndDate = nextWeekEndDate.toISOString().split('T')[0];
+
+//       const nextWeekResponse = await axios.get(
+//         `https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/totalDuration?startDate=${nextStartDate}&endDate=${nextEndDate}`,
+//         { headers }
+//       );
+//       setIsNextWeekAvailable(nextWeekResponse.data.attendances.length > 0);
+
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   };
+
+const fetchAttendanceData = async (startDate, endDate) => {
+  try {
+    const authToken = localStorage.getItem('auth-token');
+    const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+    const url = `https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/totalDuration?startDate=${startDate}&endDate=${endDate}`;
+    const response = await axios.get(url, { headers });
+    
+    // Check if response contains attendance data
+    if (response.data.attendances) {
+      // Store the fetched attendance data in localStorage
+      localStorage.setItem('attendanceData', JSON.stringify(response.data.attendances));
+      
+      // Set the state with fetched data
       setAttendanceData(response.data.attendances);
-
-      const nextWeekStartDate = new Date(endDate);
-      nextWeekStartDate.setDate(nextWeekStartDate.getDate() + 1);
-      const nextWeekEndDate = new Date(nextWeekStartDate);
-      nextWeekEndDate.setDate(nextWeekEndDate.getDate() + 6);
-
-      const nextStartDate = nextWeekStartDate.toISOString().split('T')[0];
-      const nextEndDate = nextWeekEndDate.toISOString().split('T')[0];
-
-      const nextWeekResponse = await axios.get(
-        `https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/totalDuration?startDate=${nextStartDate}&endDate=${nextEndDate}`,
-        { headers }
-      );
-      setIsNextWeekAvailable(nextWeekResponse.data.attendances.length > 0);
-
-    } catch (error) {
-      console.error(error);
     }
-  };
+
+    const nextWeekStartDate = new Date(endDate);
+    nextWeekStartDate.setDate(nextWeekStartDate.getDate() + 1);
+    const nextWeekEndDate = new Date(nextWeekStartDate);
+    nextWeekEndDate.setDate(nextWeekEndDate.getDate() + 6);
+
+    const nextStartDate = nextWeekStartDate.toISOString().split('T')[0];
+    const nextEndDate = nextWeekEndDate.toISOString().split('T')[0];
+
+    const nextWeekResponse = await axios.get(
+      `https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/totalDuration?startDate=${nextStartDate}&endDate=${nextEndDate}`,
+      { headers }
+    );
+    
+    setIsNextWeekAvailable(nextWeekResponse.data.attendances.length > 0);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+  // useEffect(() => {
+  //   const { startDate, endDate } = getWeekDates(0);
+  //   fetchAttendanceData(startDate, endDate);
+  // }, []);
 
   useEffect(() => {
-    const { startDate, endDate } = getWeekDates(0);
-    fetchAttendanceData(startDate, endDate);
+    // Check if attendance data exists in localStorage
+    const savedAttendanceData = localStorage.getItem('attendanceData');
+    if (savedAttendanceData) {
+      // If data exists in localStorage, set it in state
+      setAttendanceData(JSON.parse(savedAttendanceData));
+    } else {
+      // Otherwise, fetch fresh data
+      const { startDate, endDate } = getWeekDates(0);
+      fetchAttendanceData(startDate, endDate);
+    }
   }, []);
 
   const handleCheckInOut = async () => {
@@ -554,7 +603,8 @@ export default function Dashboard() {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
   const percentageOf10Hours = (timeString) => {
-    const [hours, minutes, seconds] = timeString.split(':').map(Number);
+    console.log(timeString, 'timeString')
+    const [hours, minutes, seconds] = timeString?.split(':').map(Number);
     const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
     const tenHoursInSeconds = 9 * 60 * 60;
     const percentage = (totalSeconds / tenHoursInSeconds) * 100;
@@ -595,13 +645,16 @@ export default function Dashboard() {
   //   setgetprojectdata(newData); // Update the state
   // };
   const getDayProgressBars = (attendances) => {
+    console.log("attendances1", attendances)
     const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return daysOfWeek.map((day, index) => {
       const attendance = attendances.find((attendance) => getDayName(attendance.date) === day);
-      const workedTimeInMinutes = attendance ? percentageOf10Hours(attendance.totalDuration) : 0;
+      console.log("sd",attendance)
+      const workedTimeInMinutes = attendance?.totalDuration ? percentageOf10Hours(attendance.totalDuration) : 0;
+      console.log("workedTimeInMinutes", workedTimeInMinutes)
       return (
         <div key={index} className="flex items-center mb-2 py-2 px-4 bg-[#fff] rounded-lg space-x-4">
-          <span className="text-gray-800 w-[5%] font-semibold">{day}</span>
+          <span className="text-g ray-800 w-[5%] font-semibold">{day}</span>
           <span className="text-gray-500 ">9:00 AM</span>
 
           {/* Tooltip Wrapper */}
@@ -626,6 +679,8 @@ export default function Dashboard() {
   };
 
   const [projectdata, setprojectdata] = useState([]);
+  const [projectdata2, setprojectdata2] = useState([]);
+
   const getuserproject = async () => {
     try {
       const authToken = localStorage.getItem('auth-token');
@@ -633,6 +688,7 @@ export default function Dashboard() {
       const url = `https://1pqbgqn7-4000.inc1.devtunnels.ms/admin/projectDetails/getUserProjects`;
       const response = await axios.get(url, { headers });
       setprojectdata(response.data.projects)
+      setprojectdata2(response.data.projects)
       console.log("responsrespons:", response)
 
     } catch (error) {
@@ -697,13 +753,6 @@ export default function Dashboard() {
 
 
 
-
-
-
-
-
-
-
   // Dummy project data
 
   // Dummy project data
@@ -735,18 +784,46 @@ export default function Dashboard() {
     { projectId: 2, projectName: "Project B", time: "", update: "" },
     { projectId: 3, projectName: "Project C", time: "", update: "" },
   ]);
-  const [getprojectdata, setgetprojectdata] = useState(
-    projects.map((project) => (
+  // const tester=  projectdata2.map((project) => {
+  //   return { projectId: project._id, projectName: project.projectName, time: "", update: "" }
+  // })
+  // console.log("tesre", tester)
 
-      { projectId: project.projectId, projectName: "Project A", time: "", update: "" }
-    ))
-  );
-  // console.log("getprojectdata:", { date: new Date().toLocaleDateString(), projects: getprojectdata });
+//   const [tester, setTester] = useState([]);
+//   useEffect(() => {
+//   const newTester = projectdata2.map((project) => {
+//     return { projectId: project._id, projectName: project.projectName, time: "", update: "" };
+//   });
+//   setTester(newTester);  // This can trigger another re-render if not handled carefully.
+// }, [projectdata2]);
 
-  const [formData, setFormData] = useState({
+  // const [getprojectdata, setgetprojectdata] = useState();
+  // useEffect(()=>{
+  //    setgetprojectdata(tester)
+  // },[])
+
+  const [getprojectdata, setgetprojectdata] = useState([]); // Initialize as an empty array
+  const [formData, setFormData] = useState();
+
+useEffect(() => {
+  if (projectdata2.length > 0) {
+    const tester = projectdata2.map((project) => {
+      return { projectId: project._id, projectName: project.projectName, time: "", Update: "" };
+    });
+    setgetprojectdata(tester); // Set the transformed data
+  }
+}, [projectdata2]); // This effect depends on projectdata2, so it will run when projectdata2 changes
+
+useEffect(()=>{
+  setFormData({
     date: new Date().toISOString().split('T')[0],
     projects: getprojectdata
-  });
+  })
+  console.log('sssssss',formData);
+},[getprojectdata])
+
+  // console.log("getprojectdata:", { date: new Date().toLocaleDateString(), projects: getprojectdata });
+
   // console.log("getprojectdata", getprojectdata)
   const [totalHours, setTotalHours] = useState(0);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
@@ -770,8 +847,6 @@ export default function Dashboard() {
       console.log("updatedData", updatedData)
       return updatedData;
     });
-
-
   };
 
   useEffect(() => {
@@ -801,7 +876,10 @@ export default function Dashboard() {
     setAlertMessage('');
     console.log("before submit", totalHours);
     if (totalHours <= totalHours1) {
-
+      setFormData({
+        date: new Date().toISOString().split('T')[0],
+        projects: getprojectdata
+      })
       // const submittedData = {
       //   date: formData.date,
       //   projects: projectdata.map(({ projectId, time, Update }) => ({
@@ -937,45 +1015,104 @@ export default function Dashboard() {
                   </TableHead>
                   <TableBody>
                     {getprojectdata.map((project, index) => (
-                      <TableRow key={project.projectId}>
-                        <TableCell>{project.projectName}</TableCell>
-                        <TableCell>
-                          <TextField
-                            type="number"
-                            inputProps={{ step: "0.01" }}
-                            placeholder="Hours"
-                            onChange={(e) =>
-                              setgetprojectdata((prevData) => {
-                                const updatedData = [...prevData];
-                                updatedData[index].time = e.target.value;
-                                return updatedData;
-                              })
-                            }
-                            fullWidth
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            placeholder="Enter your update here"
-                            type="text"
-                            onChange={(e) =>
-                              setgetprojectdata((prevData) => {
-                                const updatedData = [...prevData];
-                                updatedData[index].update = e.target.value;
-                                return updatedData;
-                              })
-                            }
-                            fullWidth
-                          />
-                        </TableCell>
-                      </TableRow>
+              <TableRow key={project.projectId}>
+              {/* Checkbox Column */}
+              <TableCell className="w-25" style={{ padding: '4px 8px' }}>
+                <input
+                  type="checkbox"
+                  checked={project.isCompleted || false}  // Default to false if not defined
+                  onChange={(e) => {
+                    const updatedData = [...getprojectdata];
+                    updatedData[index].isCompleted = e.target.checked;
+                    setgetprojectdata(updatedData);
+                  }}
+                  style={{
+                    transform: 'scale(1.2)', // Slightly smaller scale to reduce size
+                    margin: '0', // Remove extra space around the checkbox
+                  }}
+                />
+              </TableCell>
+            
+              {/* Project Name */}
+              <TableCell style={{ padding: '6px 8px', fontSize: '14px', fontWeight: '500' }}>
+                {project.projectName}
+              </TableCell>
+            
+              {/* Hours Input */}
+              <TableCell style={{ padding: '4px 8px' }}>
+                <TextField
+                  type="number"
+                  inputProps={{ step: "0.01" }}
+                  placeholder="Hours"
+                  value={project.time || ''}  // Set value to reflect current state
+                  onChange={(e) => {
+                    const updatedData = [...getprojectdata];
+                    updatedData[index].time = e.target.value;
+                    setgetprojectdata(updatedData); // Update state with new value
+                  }}
+                  fullWidth
+                  variant="outlined"
+                  margin="dense"  // Use "dense" for tighter spacing
+                  size="small"
+                  style={{
+                    padding: '6px',
+                    backgroundColor: '#f7f7f7',
+                    borderRadius: '6px',
+                    marginTop: '0px', // Remove any margin from top of the field
+                  }}
+                />
+              </TableCell>
+            
+              {/* Update Field */}
+              <TableCell style={{ padding: '4px 8px' }}>
+                <TextField
+                  placeholder="Enter your update here"
+                  type="text"
+                  value={project.Update || ''} // Bind value to reflect the current state
+                  onChange={(e) => {
+                    const updatedData = [...getprojectdata];
+                    updatedData[index].Update = e.target.value;
+                    setgetprojectdata(updatedData); // Update state with new value
+                  }}
+                  fullWidth
+                  variant="outlined"
+                  margin="dense"  // Use "dense" for tighter spacing
+                  size="small"
+                  style={{
+                    padding: '6px',
+                    backgroundColor: '#f7f7f7',
+                    borderRadius: '6px',
+                  }}
+                />
+              </TableCell>
+            </TableRow>
+            
+              
                     ))}
 
                     {/* Total Hours row moved inside TableBody */}
                     <TableRow>
+                    <TableCell className="d-flex flex-column" align="left" style={{ padding: '16px' }}>
+  <span className="mt-1" style={{ fontWeight: '500', fontSize: '14px', marginBottom: '8px' }}>
+    Others:
+  </span>
+  <TextField
+    className="w-100"
+    placeholder="Enter your update here"
+    type="text"
+    fullWidth
+    variant="outlined"
+    style={{
+      backgroundColor: '#f5f5f5',
+      borderRadius: '4px',
+      padding: '10px',
+    }}
+  />
+</TableCell>
                       <TableCell colSpan={3} align="right">
                         Total Hours: {totalHours.toFixed(2)}
                       </TableCell>
+                   
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -1056,6 +1193,7 @@ export default function Dashboard() {
       </div>
 
       {getDayProgressBars(attendanceData)}
+      {console.log("attendanceData1", attendanceData)}
     </div>
   );
 }

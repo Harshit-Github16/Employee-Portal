@@ -9,6 +9,10 @@ export default function AttendancePage() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [attendances, setAttendances] = useState([])
+  const [Totalattendances, setTotalAttendances] = useState([])
+  const [Totalabsent, setTotalAbent] = useState([])
+
+
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
@@ -18,6 +22,7 @@ export default function AttendancePage() {
     setStartDate(formatDate(start))
     setEndDate(formatDate(end))
     fetchData(formatDate(start), formatDate(end))
+    fetchweeksummray(formatDate(start), formatDate(end))
   }, [])
 
   const formatDate = (date) => {
@@ -37,9 +42,43 @@ export default function AttendancePage() {
     }
   }
 
+  const fetchweeksummray = async (start, end) => {
+    try {
+      const authToken = localStorage.getItem('auth-token')
+      const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {}
+      const url = `https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/weekSummary?startDate=${start}&endDate=${end}`
+      const response = await axios.get(url, { headers })
+      console.log("response", response.data.weeklySummary)
+
+      // setTotalAttendances(response.data.weeklySummary.map((res)=>{
+      //   if(res.attendance==true){
+      //      return res.attendance
+      //   }
+      // }) || [])
+      setTotalAttendances(response.data.weeklySummary.reduce((count, res) => {
+        if (res.attendance === true) {
+          count++;
+        }
+        return count;
+      }, 0));
+
+
+      setTotalAbent(response.data.weeklySummary.reduce((count, res) => {
+        if (res.isAbsent === true) {
+          count++;
+        }
+        return count;
+      }, 0));
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  console.log(Totalattendances)
   const handleSubmit = (e) => {
     e.preventDefault()
     fetchData(startDate, endDate)
+
   }
 
 
@@ -90,23 +129,23 @@ export default function AttendancePage() {
     // Example data, you can add more rows dynamically
   ]);
 
-    // Function to handle opening the dialog
-    const handleClickOpen = (checkIn,checkout) => {
-      setOpen(true)
-      console.log(checkIn, checkout)
-      setAttendances1({
-        date: '2024-11-10',
-        loginTime: checkIn,
-        logoutTime: checkout,
-        status: 'in',
-      })
-    }
-  
-    // Function to handle closing the dialog
-    const handleClose = () => {
-      
-      setOpen(false)
-    }
+  // Function to handle opening the dialog
+  const handleClickOpen = (checkIn, checkout) => {
+    setOpen(true)
+    console.log(checkIn, checkout)
+    setAttendances1({
+      date: '2024-11-10',
+      loginTime: checkIn,
+      logoutTime: checkout,
+      status: 'in',
+    })
+  }
+
+  // Function to handle closing the dialog
+  const handleClose = () => {
+
+    setOpen(false)
+  }
 
   // const handleClickOpen = () => setOpen(true);
   // const handleClose = () => setOpen(false);
@@ -124,24 +163,24 @@ export default function AttendancePage() {
   // };
 
 
-    // Handle changes in the input fields
-    const handleLoginTimeChange = (e) => {
-      setAttendances1({ ...attendances1, loginTime: e.target.value });
-    };
-  
-    const handleLogoutTimeChange = (e) => {
-      setAttendances1({ ...attendances1, logoutTime: e.target.value });
-    };
-  
-    const handleStatusChange = (e) => {
-      setAttendances1({ ...attendances1, status: e.target.value });
-    };
-  
-    // Handle form submission (when "Apply" is clicked)
-    const handleFormSubmit = () => {
-      handleSubmit(attendances1); // Pass the updated attendance data to the parent
-      handleClose(); // Close the dialog after submitting
-    };
+  // Handle changes in the input fields
+  const handleLoginTimeChange = (e) => {
+    setAttendances1({ ...attendances1, loginTime: e.target.value });
+  };
+
+  const handleLogoutTimeChange = (e) => {
+    setAttendances1({ ...attendances1, logoutTime: e.target.value });
+  };
+
+  const handleStatusChange = (e) => {
+    setAttendances1({ ...attendances1, status: e.target.value });
+  };
+
+  // Handle form submission (when "Apply" is clicked)
+  const handleFormSubmit = () => {
+    handleSubmit(attendances1); // Pass the updated attendance data to the parent
+    handleClose(); // Close the dialog after submitting
+  };
 
 
   const [open1, setOpen1] = React.useState(1);
@@ -179,10 +218,10 @@ export default function AttendancePage() {
       <div className="mb-6 p-4 bg-gray-100 rounded-lg shadow-md">
         <div className="flex justify-between">
           <div className="text-sm font-semibold text-gray-700">
-            <Typography variant="body1">Total Present: 20</Typography>
+            <Typography variant="body1">Total Present: {Totalattendances}</Typography>
           </div>
           <div className="text-sm font-semibold text-gray-700">
-            <Typography variant="body1">Total Absent: 5</Typography>
+            <Typography variant="body1">Total Absent: {Totalabsent}</Typography>
           </div>
           <div className="text-sm font-semibold text-gray-700">
             <Typography variant="body1">Total Work: 25/75 Hours</Typography>
@@ -216,48 +255,48 @@ export default function AttendancePage() {
 
                 <TableRow key={attendance.date} className="hover:bg-gray-100">
                   <TableCell className=" border-b w-[30%]">
-                     <Accordion className=''>
-                    <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel1a-content" id="panel1a-header">
-                      <Typography >{attendance.date}   </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Grid container spacing={1}>
-                        {attendance.sessions.map((session, index) => (
-                          <Grid item xs={12} key={index}>
-                            <Box
-                              sx={{
-                                border: '1px solid #ddd',
-                                borderRadius: '8px',
-                                padding: '16px',
-                                marginBottom: '8px',
-                                backgroundColor: '#f9f9f9',
-                                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
-                              }}
-                            >
-                              {/* <Typography variant="body1" fontWeight="bold">Session {index + 1}</Typography> */}
-                              <Box display="flex" justifyContent="space-between" mt={1}>
-                                <Typography variant="body2">
-                                  <strong>Check-In:</strong> {formatTime(session.checkIn)}
-                                </Typography>
-                                <Typography variant="body2">
-                                  <strong>Check-Out:</strong> {formatTime(session.checkOut)}
-                                </Typography>
+                    <Accordion className=''>
+                      <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel1a-content" id="panel1a-header">
+                        <Typography >{attendance.date}   </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Grid container spacing={1}>
+                          {attendance.sessions.map((session, index) => (
+                            <Grid item xs={12} key={index}>
+                              <Box
+                                sx={{
+                                  border: '1px solid #ddd',
+                                  borderRadius: '8px',
+                                  padding: '16px',
+                                  marginBottom: '8px',
+                                  backgroundColor: '#f9f9f9',
+                                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                                }}
+                              >
+                                {/* <Typography variant="body1" fontWeight="bold">Session {index + 1}</Typography> */}
+                                <Box display="flex" justifyContent="space-between" mt={1}>
+                                  <Typography variant="body2">
+                                    <strong>Check-In:</strong> {formatTime(session.checkIn)}
+                                  </Typography>
+                                  <Typography variant="body2">
+                                    <strong>Check-Out:</strong> {formatTime(session.checkOut)}
+                                  </Typography>
+                                </Box>
                               </Box>
-                            </Box>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion> </TableCell>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </AccordionDetails>
+                    </Accordion> </TableCell>
                   <TableCell className="p-4 border-b">{formatTime(attendance.sessions[0].checkIn)}</TableCell>
                   <TableCell className="p-4 border-b">{formatTime(attendance.sessions[attendance.sessions.length - 1].checkOut)}</TableCell>
                   <TableCell className="p-4 border-b">{attendance.totalDuration}</TableCell>
                   <TableCell className="p-4 border-b">
-                    <Button variant="outlined" 
-                    onClick={() => handleClickOpen(
-                      formatTime(attendance.sessions[0].checkIn), 
-                      formatTime(attendance.sessions[attendance.sessions.length - 1].checkOut)
-                    )} >Regularise</Button>
+                    <Button variant="outlined"
+                      onClick={() => handleClickOpen(
+                        formatTime(attendance.sessions[0].checkIn),
+                        formatTime(attendance.sessions[attendance.sessions.length - 1].checkOut)
+                      )} >Regularise</Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -291,37 +330,37 @@ export default function AttendancePage() {
       {/* Dialog Box */}
       <Dialog open={open} className='w-50 mx-auto' onClose={handleClose}>
         <DialogTitle>Regularise Attendance</DialogTitle>
-      <DialogContent>
-        {/* Form Fields */}
-        <TextField
-          label="Login Time"
-          type="text"
-          value={attendances1.loginTime}
-          onChange={handleLoginTimeChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Logout Time"
-          type="text"
-          value={attendances1.logoutTime}
-          onChange={handleLogoutTimeChange}
-          fullWidth
-          margin="normal"
-        />
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Status</InputLabel>
-          <Select
-            value={attendances1.status}
-            onChange={handleStatusChange}
-            label="Status"
-          >
-            <MenuItem value="in">In</MenuItem>
-            <MenuItem value="out">Out</MenuItem>
-            <MenuItem value="both">Both</MenuItem>
-          </Select>
-        </FormControl>
-      </DialogContent>
+        <DialogContent>
+          {/* Form Fields */}
+          <TextField
+            label="Login Time"
+            type="text"
+            value={attendances1.loginTime}
+            onChange={handleLoginTimeChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Logout Time"
+            type="text"
+            value={attendances1.logoutTime}
+            onChange={handleLogoutTimeChange}
+            fullWidth
+            margin="normal"
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={attendances1.status}
+              onChange={handleStatusChange}
+              label="Status"
+            >
+              <MenuItem value="in">In</MenuItem>
+              <MenuItem value="out">Out</MenuItem>
+              <MenuItem value="both">Both</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary">
             Cancel

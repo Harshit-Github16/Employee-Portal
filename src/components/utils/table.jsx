@@ -504,7 +504,10 @@ export const ProjectListTable = ({ projectData, onViewDetails, onDeleteProject, 
           {projectData.map((project, index) => (
             <TableRow key={project._id} sx={{ background: index % 2 === 0 ? '#f9f9f9' : 'white' }}>
               <TableCell onClick={() => router.push(`/projectTracker?projectName=${(project._id)}`)}>
-                {project.projectName}
+              <a href="">
+                  
+              {project.projectName}
+              </a>
               </TableCell>
               <TableCell align="right">{project.projectType}</TableCell>
               <TableCell align="right">{project.clientName}</TableCell>
@@ -543,9 +546,9 @@ export const ProjectListTable = ({ projectData, onViewDetails, onDeleteProject, 
               </TableCell>
               <TableCell align="right" sx={{ border: '1px solid #ddd', width: '120px' }}>
                 <div className="flex justify-around">
-                  <IconButton color="primary" size="small" onClick={() => onViewDetails(project)}>
+                  {/* <IconButton color="primary" size="small" onClick={() => onViewDetails(project)}>
                     <Visibility />
-                  </IconButton>
+                  </IconButton> */}
                   <IconButton color="error" size="small" onClick={() => onDeleteProject(project)}>
                     <Delete />
                   </IconButton>
