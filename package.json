@@ -36,7 +36,7 @@
     "react-select": "^5.8.3",
     "react-toastify": "^10.0.6",
     "react-tooltip": "^5.28.0",
-    "recharts": "^2.13.0",
+    "recharts": "^2.13.3",
     "xlsx": "^0.18.5",
     "yup": "^1.4.0"
   },

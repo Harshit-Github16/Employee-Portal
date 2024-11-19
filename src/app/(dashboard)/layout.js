@@ -20,7 +20,7 @@ import { Toaster } from 'react-hot-toast';
 
 const menuOptions = [
   { label: 'Dashboard', icon: faTachometerAlt, url: '/dashboard' },
-  { label: 'BioMertic', icon: faUser, url: '/biometric' },
+  { label: 'Biometric', icon: faUser, url: '/biometric' },
   { label: 'HRIS', icon: faBuilding, url: '#', hasDropdown: true },
   { label: 'Leaves', icon: faCalendarAlt, url: '/leaves' },
   { label: 'Employee', icon: faUser, url: '/employee' },

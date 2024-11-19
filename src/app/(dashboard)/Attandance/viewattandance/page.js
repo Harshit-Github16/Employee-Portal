@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { DialogActions, DialogContent, Dialog,DialogTitle,Button, TextField, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem, FormControl, InputLabel } from '@mui/material'
+import { ExpandMore } from '@mui/icons-material'
+// import { DialogActions, DialogContent, Dialog,DialogTitle,Button, TextField, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem, FormControl, InputLabel } from '@mui/material'
+import { Button, Dialog, Accordion, CardContent, Card, AccordionSummary, Grid, Box, AccordionDetails, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Select, MenuItem, TextField, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material'
 
 export default function AttendancePage() {
   const [startDate, setStartDate] = useState('')
@@ -181,7 +183,41 @@ export default function AttendancePage() {
             {attendances.length > 0 ? (
               attendances.map((attendance) => (
                 <TableRow key={attendance.date} className="hover:bg-gray-100">
-                  <TableCell className="p-4 border-b">{attendance.date}</TableCell>
+                  <TableCell className="p-4 border-b w-[30%]">
+                  <Accordion className=''>
+                      <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel1a-content" id="panel1a-header">
+                        <Typography >{attendance.date}   </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Grid container spacing={1}>
+                          {attendance.sessions.map((session, index) => (
+                            <Grid item xs={12} key={index}>
+                              <Box
+                                sx={{
+                                  border: '1px solid #ddd',
+                                  borderRadius: '8px',
+                                  padding: '16px',
+                                  marginBottom: '8px',
+                                  backgroundColor: '#f9f9f9',
+                                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                                }}
+                              >
+                                {/* <Typography variant="body1" fontWeight="bold">Session {index + 1}</Typography> */}
+                                <Box display="flex" justifyContent="space-between" mt={1}>
+                                  <Typography variant="body2">
+                                    <strong>Check-In:</strong> {formatTime(session.checkIn)}
+                                  </Typography>
+                                  <Typography variant="body2">
+                                    <strong>Check-Out:</strong> {formatTime(session.checkOut)}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </AccordionDetails>
+                    </Accordion> 
+                    </TableCell>
                   <TableCell className="p-4 border-b">{formatTime(attendance.sessions[0].checkIn)}</TableCell>
                   <TableCell className="p-4 border-b">{formatTime(attendance.sessions[attendance.sessions.length - 1].checkOut)}</TableCell>
                   <TableCell className="p-4 border-b">{attendance.totalDuration}</TableCell>
@@ -191,6 +227,92 @@ export default function AttendancePage() {
                         formatTime(attendance.sessions[0].checkIn),
                         formatTime(attendance.sessions[attendance.sessions.length - 1].checkOut)
                       )} >Regularise</Button>
+                        {/* Dialog Box */}
+                    <Dialog open={open} onClose={handleClose} BackdropProps={{
+                      style: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                      },
+                    }} maxWidth="md" className=" mx-auto">
+                      <DialogContent>
+                        <Grid container spacing={6}>
+                          {/* Left side: Form Fields */}
+                          <Grid item xs={12} md={6} className="px-4">
+                            <Card className="p-6 ms-4 shadow-lg rounded-lg border border-gray-200">
+                              <DialogTitle className="text-xl font-semibold mb-4">Regularise Attendance</DialogTitle>
+                              <div className="space-y-4">
+                                {/* Status Dropdown */}
+                                <FormControl fullWidth margin="normal">
+                                  <InputLabel>Status</InputLabel>
+                                  <Select
+                                    value={attendances1.status}
+                                    onChange={handleStatusChange}
+                                    label="Status"
+                                    className="bg-white border border-gray-300 rounded-md shadow-sm"
+                                  >
+                                    <MenuItem value="in">In</MenuItem>
+                                    <MenuItem value="out">Out</MenuItem>
+                                    <MenuItem value="both">Both</MenuItem>
+                                  </Select>
+                                </FormControl>
+
+                                {/* Login Time */}
+                                <TextField
+                                  label="Login Time"
+                                  type="text"
+                                  value={attendances1.loginTime}
+                                  onChange={handleLoginTimeChange}
+                                  fullWidth
+                                  margin="normal"
+                                  disabled={attendances1.status === 'out'}
+                                  className="bg-white border border-gray-300 rounded-md shadow-sm"
+                                />
+
+                                {/* Logout Time */}
+                                <TextField
+                                  label="Logout Time"
+                                  type="text"
+                                  value={attendances1.logoutTime}
+                                  onChange={handleLogoutTimeChange}
+                                  fullWidth
+                                  margin="normal"
+                                  disabled={attendances1.status === 'in'}
+                                  className="bg-white border border-gray-300 rounded-md shadow-sm"
+                                />
+
+                                {/* Dialog Actions */}
+                                <DialogActions className="justify-center mt-6">
+                                  <Button onClick={handleClose} color="secondary" className="py-2 px-6 rounded-md bg-gray-300 hover:bg-gray-400 text-sm">
+                                    Cancel
+                                  </Button>
+                                  <Button onClick={handleSubmit} color="primary" className="py-2 px-6 rounded-md bg-blue-500 hover:bg-blue-600 text-sm text-white">
+                                    Apply
+                                  </Button>
+                                </DialogActions>
+                              </div>
+                            </Card>
+                          </Grid>
+
+                          {/* Right side: Sessions List */}
+                          <Grid item xs={12} md={6} className="px-4">
+                            <Typography variant="h6" className="text-lg font-semibold mb-4">
+                              Sessions
+                            </Typography>
+                            <Card variant="outlined" className="max-h-[380px] overflow-y-auto shadow-md border border-gray-200 rounded-lg  ">
+                              <CardContent className="p-4">
+                                {attendance.sessions.map((session, index) => (
+                                  <Box key={index} className="mb-4 p-3 border border-gray-200 rounded-md">
+                                    <Typography variant="body2" className="text-sm text-gray-700 d-flex justify-between">
+                                      {/* <strong>Session {index + 1}:</strong>  */}
+                                      <span> Check-In: {formatTime(session.checkIn)} </span> <span >  Check-Out: {formatTime(session.checkOut)} </span>
+                                    </Typography>
+                                  </Box>
+                                ))}
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        </Grid>
+                      </DialogContent>
+                    </Dialog>
                     </TableCell>
                 </TableRow>
               ))
@@ -204,53 +326,6 @@ export default function AttendancePage() {
           </TableBody>
         </Table>
       </TableContainer>
-
-         {/* Dialog Box */}
-         <Dialog open={open} className='w-50 mx-auto' onClose={handleClose}>
-        <DialogTitle>Regularise Attendance</DialogTitle>
-        <DialogContent>
-          {/* Form Fields */}
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={attendances1.status}
-              onChange={handleStatusChange}
-              label="Status"
-            >
-              <MenuItem value="in">In</MenuItem>
-              <MenuItem value="out">Out</MenuItem>
-              <MenuItem value="both">Both</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label="Login Time"
-            type="text"
-            value={attendances1.loginTime}
-            onChange={handleLoginTimeChange}
-            fullWidth
-            margin="normal"
-            disabled={attendances1.status === 'out'}
-          />
-          <TextField
-            label="Logout Time"
-            type="text"
-            value={attendances1.logoutTime}
-            onChange={handleLogoutTimeChange}
-            fullWidth
-            margin="normal"
-            disabled={attendances1.status === 'in'}
-          />
-
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} color="primary">
-            Apply
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Container>
   )
 }

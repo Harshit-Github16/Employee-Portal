@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Button, Dialog, Accordion, AccordionSummary, Grid, Box, AccordionDetails, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Select, MenuItem, TextField, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material'
+import { Button, Dialog, Accordion, CardContent, Card, AccordionSummary, Grid, Box, AccordionDetails, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Select, MenuItem, TextField, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material'
 // import { Typography, Grid, Box } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
 export default function AttendancePage() {
@@ -125,14 +125,14 @@ export default function AttendancePage() {
   const tester = convertSecondsToHMS(totalWorkingHours)
 
   // Convert 9:30 hours to seconds
-const nineThirtyInSeconds = (9 * 3600) + (30 * 60); // 9 hours and 30 minutes in seconds
+  const nineThirtyInSeconds = (9 * 3600) + (30 * 60); // 9 hours and 30 minutes in seconds
 
-// Multiply totalWorkingHours by 9:30 (in seconds)
-const multipliedTimeInSeconds = totalWorkingHours * nineThirtyInSeconds;
+  // Multiply totalWorkingHours by 9:30 (in seconds)
+  const multipliedTimeInSeconds = totalWorkingHours * nineThirtyInSeconds;
 
-// Convert the result back to HH:MM:SS format
-const resultTime = convertSecondsToHMS(multipliedTimeInSeconds);
-console.log("resultTime", resultTime)
+  // Convert the result back to HH:MM:SS format
+  const resultTime = convertSecondsToHMS(multipliedTimeInSeconds);
+  console.log("resultTime", resultTime)
 
   // Function to format the time as HH:MM (12-hour format)
   const formatTime = (dateString) => {
@@ -328,6 +328,96 @@ console.log("resultTime", resultTime)
                         formatTime(attendance.sessions[0].checkIn),
                         formatTime(attendance.sessions[attendance.sessions.length - 1].checkOut)
                       )} >Regularise</Button>
+
+                    {/* Dialog Box */}
+                    <Dialog open={open} onClose={handleClose} BackdropProps={{
+                      style: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                      },
+                    }} maxWidth="md" className=" mx-auto">
+                      <DialogContent>
+                        <Grid container spacing={6}>
+                          {/* Left side: Form Fields */}
+                          <Grid item xs={12} md={6} className="px-4">
+                            <Card className="p-6 ms-4 shadow-lg rounded-lg border border-gray-200">
+                              <DialogTitle className="text-xl font-semibold mb-4">Regularise Attendance</DialogTitle>
+                              <div className="space-y-4">
+                                {/* Status Dropdown */}
+                                <FormControl fullWidth margin="normal">
+                                  <InputLabel>Status</InputLabel>
+                                  <Select
+                                    value={attendances1.status}
+                                    onChange={handleStatusChange}
+                                    label="Status"
+                                    className="bg-white border border-gray-300 rounded-md shadow-sm"
+                                  >
+                                    <MenuItem value="in">In</MenuItem>
+                                    <MenuItem value="out">Out</MenuItem>
+                                    <MenuItem value="both">Both</MenuItem>
+                                  </Select>
+                                </FormControl>
+
+                                {/* Login Time */}
+                                <TextField
+                                  label="Login Time"
+                                  type="text"
+                                  value={attendances1.loginTime}
+                                  onChange={handleLoginTimeChange}
+                                  fullWidth
+                                  margin="normal"
+                                  disabled={attendances1.status === 'out'}
+                                  className="bg-white border border-gray-300 rounded-md shadow-sm"
+                                />
+
+                                {/* Logout Time */}
+                                <TextField
+                                  label="Logout Time"
+                                  type="text"
+                                  value={attendances1.logoutTime}
+                                  onChange={handleLogoutTimeChange}
+                                  fullWidth
+                                  margin="normal"
+                                  disabled={attendances1.status === 'in'}
+                                  className="bg-white border border-gray-300 rounded-md shadow-sm"
+                                />
+
+                                {/* Dialog Actions */}
+                                <DialogActions className="justify-center mt-6">
+                                  <Button onClick={handleClose} color="secondary" className="py-2 px-6 rounded-md bg-gray-300 hover:bg-gray-400 text-sm">
+                                    Cancel
+                                  </Button>
+                                  <Button onClick={handleSubmit} color="primary" className="py-2 px-6 rounded-md bg-blue-500 hover:bg-blue-600 text-sm text-white">
+                                    Apply
+                                  </Button>
+                                </DialogActions>
+                              </div>
+                            </Card>
+                          </Grid>
+
+                          {/* Right side: Sessions List */}
+                          <Grid item xs={12} md={6} className="px-4">
+                            <Typography variant="h6" className="text-lg font-semibold mb-4">
+                              Sessions
+                            </Typography>
+                            <Card variant="outlined" className="max-h-[380px] overflow-y-auto shadow-md border border-gray-200 rounded-lg  ">
+                              <CardContent className="p-4">
+                                {attendance.sessions.map((session, index) => (
+                                  <Box key={index} className="mb-4 p-3 border border-gray-200 rounded-md">
+                                    <Typography variant="body2" className="text-sm text-gray-700 d-flex justify-between">
+                                      {/* <strong>Session {index + 1}:</strong>  */}
+                                      <span> Check-In: {formatTime(session.checkIn)} </span> <span >  Check-Out: {formatTime(session.checkOut)} </span>
+                                    </Typography>
+                                  </Box>
+                                ))}
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        </Grid>
+                      </DialogContent>
+                    </Dialog>
+
+
+
                   </TableCell>
                 </TableRow>
               ))
@@ -358,52 +448,7 @@ console.log("resultTime", resultTime)
         </Table>
       </TableContainer>
 
-      {/* Dialog Box */}
-      <Dialog open={open} className='w-50 mx-auto' onClose={handleClose}>
-        <DialogTitle>Regularise Attendance</DialogTitle>
-        <DialogContent>
-          {/* Form Fields */}
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={attendances1.status}
-              onChange={handleStatusChange}
-              label="Status"
-            >
-              <MenuItem value="in">In</MenuItem>
-              <MenuItem value="out">Out</MenuItem>
-              <MenuItem value="both">Both</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label="Login Time"
-            type="text"
-            value={attendances1.loginTime}
-            onChange={handleLoginTimeChange}
-            fullWidth
-            margin="normal"
-            disabled={attendances1.status === 'out'}
-          />
-          <TextField
-            label="Logout Time"
-            type="text"
-            value={attendances1.logoutTime}
-            onChange={handleLogoutTimeChange}
-            fullWidth
-            margin="normal"
-            disabled={attendances1.status === 'in'}
-          />
 
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} color="primary">
-            Apply
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Container>
   )
 }

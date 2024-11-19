@@ -292,6 +292,7 @@ import Typography from '@mui/material/Typography';
 import { styled } from '@mui/system';
 import { useRouter } from "next/navigation";
 
+
 // import { Checkbox } from "@/components/ui/checkbox"
 // import { Input } from "@/components/ui/input"
 // import { Textarea } from "@/components/ui/textarea"
@@ -691,6 +692,7 @@ const fetchAttendanceData = async (startDate, endDate) => {
     try {
       const authToken = localStorage.getItem('auth-token');
       const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+
       const url = `https://1pqbgqn7-4000.inc1.devtunnels.ms/admin/projectDetails/getUserProjects`;
       const response = await axios.get(url, { headers });
       setprojectdata(response.data.projects)
