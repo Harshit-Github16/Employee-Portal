@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Button, TextField, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem, FormControl, InputLabel } from '@mui/material'
+import { DialogActions, DialogContent, Dialog,DialogTitle,Button, TextField, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem, FormControl, InputLabel } from '@mui/material'
 
 export default function AttendancePage() {
   const [startDate, setStartDate] = useState('')
@@ -52,7 +52,70 @@ export default function AttendancePage() {
   const handleSubmit = (e) => {
     e.preventDefault()
     fetchData(startDate, endDate, selectedEmployee)
+
+
   }
+
+  const [open, setOpen] = useState(false)
+      // Function to format the time as HH:MM (12-hour format)
+      const formatTime = (dateString) => {
+        const date = new Date(dateString);
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        // const suffix = hours >= 12 ? 'PM' : 'AM';
+        const suffix = hours >= 12 ? '' : '';
+        const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+        const formattedMinutes = minutes.toString().padStart(2, '0');
+        return `${formattedHours}:${formattedMinutes} ${suffix}`;
+      }
+
+        // const [open, setOpen] = useState(false);
+  const [attendances1, setAttendances1] = useState([
+    {
+      date: '',
+      loginTime: '',
+      logoutTime: '',
+      status: 'both',
+    },
+    // Example data, you can add more rows dynamically
+  ]);
+    // Function to handle opening the dialog
+    const handleClickOpen = (checkIn, checkout) => {
+      setOpen(true)
+      console.log(checkIn, checkout)
+      setAttendances1({
+        date: '2024-11-10',
+        loginTime: checkIn,
+        logoutTime: checkout,
+        status: 'both',
+      })
+    }
+  
+    // Function to handle closing the dialog
+    const handleClose = () => {
+  
+      setOpen(false)
+    }
+
+      // Handle changes in the input fields
+  const handleLoginTimeChange = (e) => {
+    setAttendances1({ ...attendances1, loginTime: e.target.value });
+  };
+
+  const handleLogoutTimeChange = (e) => {
+    setAttendances1({ ...attendances1, logoutTime: e.target.value });
+  };
+
+  const handleStatusChange = (e) => {
+    setAttendances1({ ...attendances1, status: e.target.value });
+  };
+
+  // Handle form submission (when "Apply" is clicked)
+  const handleFormSubmit = () => {
+    handleSubmit(attendances1); // Pass the updated attendance data to the parent
+    handleClose(); // Close the dialog after submitting
+  };  
+  
 
   return (
     <Container maxWidth="lg" className="bg-white p-8 rounded-lg shadow-lg">
@@ -119,10 +182,16 @@ export default function AttendancePage() {
               attendances.map((attendance) => (
                 <TableRow key={attendance.date} className="hover:bg-gray-100">
                   <TableCell className="p-4 border-b">{attendance.date}</TableCell>
-                  <TableCell className="p-4 border-b">{attendance.sessions[0].checkIn}</TableCell>
-                  <TableCell className="p-4 border-b">{attendance.sessions[attendance.sessions.length-1].checkOut}</TableCell>
+                  <TableCell className="p-4 border-b">{formatTime(attendance.sessions[0].checkIn)}</TableCell>
+                  <TableCell className="p-4 border-b">{formatTime(attendance.sessions[attendance.sessions.length - 1].checkOut)}</TableCell>
                   <TableCell className="p-4 border-b">{attendance.totalDuration}</TableCell>
-                  <TableCell className="p-4 border-b"><button className='btn btn-primary btn-sm text-xs'>Regularise</button></TableCell>
+                  <TableCell className="p-4 border-b">
+                  <Button variant="outlined"
+                      onClick={() => handleClickOpen(
+                        formatTime(attendance.sessions[0].checkIn),
+                        formatTime(attendance.sessions[attendance.sessions.length - 1].checkOut)
+                      )} >Regularise</Button>
+                    </TableCell>
                 </TableRow>
               ))
             ) : (
@@ -135,6 +204,53 @@ export default function AttendancePage() {
           </TableBody>
         </Table>
       </TableContainer>
+
+         {/* Dialog Box */}
+         <Dialog open={open} className='w-50 mx-auto' onClose={handleClose}>
+        <DialogTitle>Regularise Attendance</DialogTitle>
+        <DialogContent>
+          {/* Form Fields */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={attendances1.status}
+              onChange={handleStatusChange}
+              label="Status"
+            >
+              <MenuItem value="in">In</MenuItem>
+              <MenuItem value="out">Out</MenuItem>
+              <MenuItem value="both">Both</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            label="Login Time"
+            type="text"
+            value={attendances1.loginTime}
+            onChange={handleLoginTimeChange}
+            fullWidth
+            margin="normal"
+            disabled={attendances1.status === 'out'}
+          />
+          <TextField
+            label="Logout Time"
+            type="text"
+            value={attendances1.logoutTime}
+            onChange={handleLogoutTimeChange}
+            fullWidth
+            margin="normal"
+            disabled={attendances1.status === 'in'}
+          />
+
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} color="primary">
+            Apply
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   )
 }

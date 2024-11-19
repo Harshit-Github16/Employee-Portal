@@ -11,6 +11,10 @@ export default function AttendancePage() {
   const [attendances, setAttendances] = useState([])
   const [Totalattendances, setTotalAttendances] = useState([])
   const [Totalabsent, setTotalAbent] = useState([])
+  const [TotalHoliday, setTotalHoliday] = useState([])
+  const [TotalWeekend, setTotalWeekend] = useState([])
+
+
 
 
   const [open, setOpen] = useState(false)
@@ -69,6 +73,21 @@ export default function AttendancePage() {
         }
         return count;
       }, 0));
+
+      setTotalHoliday(response.data.weeklySummary.reduce((count, res) => {
+        if (res.isHoliday === true) {
+          count++;
+        }
+        return count;
+      }, 0));
+
+      setTotalWeekend(response.data.weeklySummary.reduce((count, res) => {
+        if (res.isWeekend === true) {
+          count++;
+        }
+        return count;
+      }, 0));
+
     } catch (error) {
       console.error(error)
     }
@@ -102,7 +121,18 @@ export default function AttendancePage() {
 
     return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
   }
+  console.log("totalWorkingHours", totalWorkingHours)
   const tester = convertSecondsToHMS(totalWorkingHours)
+
+  // Convert 9:30 hours to seconds
+const nineThirtyInSeconds = (9 * 3600) + (30 * 60); // 9 hours and 30 minutes in seconds
+
+// Multiply totalWorkingHours by 9:30 (in seconds)
+const multipliedTimeInSeconds = totalWorkingHours * nineThirtyInSeconds;
+
+// Convert the result back to HH:MM:SS format
+const resultTime = convertSecondsToHMS(multipliedTimeInSeconds);
+console.log("resultTime", resultTime)
 
   // Function to format the time as HH:MM (12-hour format)
   const formatTime = (dateString) => {
@@ -224,16 +254,17 @@ export default function AttendancePage() {
             <Typography variant="body1">Total Absent: {Totalabsent}</Typography>
           </div>
           <div className="text-sm font-semibold text-gray-700">
-            <Typography variant="body1">Total Work: 25/75 Hours</Typography>
+            <Typography variant="body1">Total Work:   {tester}/75 Hours</Typography>
           </div>
-          <div className="text-sm font-semibold text-gray-700">
+          {console.log("tester", tester)}
+          {/* <div className="text-sm font-semibold text-gray-700">
             <Typography variant="body1">Total Week: 7</Typography>
+          </div> */}
+          <div className="text-sm font-semibold text-gray-700">
+            <Typography variant="body1">Total Public:{TotalHoliday}</Typography>
           </div>
           <div className="text-sm font-semibold text-gray-700">
-            <Typography variant="body1">Total Public: 3</Typography>
-          </div>
-          <div className="text-sm font-semibold text-gray-700">
-            <Typography variant="body1">Holiday: 2</Typography>
+            <Typography variant="body1">Holiday:{TotalWeekend}</Typography>
           </div>
         </div>
       </div>
@@ -332,22 +363,6 @@ export default function AttendancePage() {
         <DialogTitle>Regularise Attendance</DialogTitle>
         <DialogContent>
           {/* Form Fields */}
-          <TextField
-            label="Login Time"
-            type="text"
-            value={attendances1.loginTime}
-            onChange={handleLoginTimeChange}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Logout Time"
-            type="text"
-            value={attendances1.logoutTime}
-            onChange={handleLogoutTimeChange}
-            fullWidth
-            margin="normal"
-          />
           <FormControl fullWidth margin="normal">
             <InputLabel>Status</InputLabel>
             <Select
@@ -360,6 +375,25 @@ export default function AttendancePage() {
               <MenuItem value="both">Both</MenuItem>
             </Select>
           </FormControl>
+          <TextField
+            label="Login Time"
+            type="text"
+            value={attendances1.loginTime}
+            onChange={handleLoginTimeChange}
+            fullWidth
+            margin="normal"
+            disabled={attendances1.status === 'out'}
+          />
+          <TextField
+            label="Logout Time"
+            type="text"
+            value={attendances1.logoutTime}
+            onChange={handleLogoutTimeChange}
+            fullWidth
+            margin="normal"
+            disabled={attendances1.status === 'in'}
+          />
+
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary">

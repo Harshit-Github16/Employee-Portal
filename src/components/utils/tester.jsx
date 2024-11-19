@@ -1008,7 +1008,7 @@ useEffect(()=>{
                 </Table> */}
                   <Typography className="text-gray-700 text-center mb-6">
                   <span className='w-100'>
-                       CheckOut Time: 00:12:31
+                       CheckOut Time: {formatTime(elapsedTime)}
                        </span>
                         <span className='hidden'>  Checkout Time: {totalHours1}</span>
             </Typography>
@@ -1034,7 +1034,7 @@ useEffect(()=>{
                     {getprojectdata.map((project, index) => (
               <TableRow key={project.projectId}>
               {/* Checkbox Column */}
-              <TableCell className="w-25" style={{ padding: '4px 8px' }}>
+              {/* <TableCell className="w-25" style={{ padding: '4px 8px' }}>
                 <input
                   type="checkbox"
                   checked={project.isCompleted || false}  // Default to false if not defined
@@ -1047,6 +1047,17 @@ useEffect(()=>{
                     transform: 'scale(1.2)', // Slightly smaller scale to reduce size
                     margin: '0', // Remove extra space around the checkbox
                   }}
+                />
+              </TableCell> */}
+               <TableCell>
+                <Checkbox
+                   checked={project.isCompleted || false} 
+                  onChange={(e) => {
+                    const updatedData = [...getprojectdata];
+                    updatedData[index].isCompleted = e.target.checked;
+                    setgetprojectdata(updatedData);
+                  }}
+                  aria-label={`Mark as complete`}
                 />
               </TableCell>
             
@@ -1106,67 +1117,6 @@ useEffect(()=>{
             
               
                     ))}
-
-
-             <TableRow key={2}>
-              <TableCell>
-                <Checkbox
-                  checked={''}
-                  onCheckedChange={() => handleCheckboxChange()}
-                  aria-label={`Mark as complete`}
-                />
-              </TableCell>
-              <TableCell className="font-medium">{'tester'}</TableCell>
-              <TableCell>
-                <TextField
-                  type="number"
-                  placeholder="Hours"
-                  // value={project.time}
-                  onChange={(e) => handleTimeChange( e.target.value)}
-                  className="w-[200px]"
-                  step="0.01"
-                  min="0"
-                />
-              </TableCell>
-              <TableCell>
-                <TextField
-                  placeholder="Enter your update here"
-                  // value={}
-                  onChange={(e) => handleUpdateChange( e.target.value)}
-                  className="w-full"
-                />
-              </TableCell>
-            </TableRow>
-
-            <TableRow key={3}>
-              <TableCell>
-                <Checkbox
-                  checked={''}
-                  onCheckedChange={() => handleCheckboxChange()}
-                  aria-label={`Mark  as complete`}
-                />
-              </TableCell>
-              <TableCell className="font-medium">{'checker'}</TableCell>
-              <TableCell>
-                <TextField
-                  type="number"
-                  placeholder="Hours"
-                  // value={}
-                  onChange={(e) => handleTimeChange(e.target.value)}
-                  className="w-[200px]"
-                  step="0.01"
-                  min="0"
-                />
-              </TableCell>
-              <TableCell>
-                <TextField
-                  placeholder="Enter your update here"
-                  // value={}
-                  onChange={(e) => handleUpdateChange( e.target.value)}
-                  className="w-full"
-                />
-              </TableCell>
-            </TableRow>
 
                     {/* Total Hours row moved inside TableBody */}
                     <TableRow>
