@@ -367,6 +367,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { Link } from "@mui/icons-material";
 export default function ProjectForm() {
   const router = useRouter();
   console.log("router.query", router.query)
@@ -391,11 +392,12 @@ export default function ProjectForm() {
     resultFirstTalk: "",
     resources: [
       {
-        assignedTo: [],
+        assignedTo2: [],
         numberOfResources: "",
         startDate: "",
-        expectedEndDate: "",
         remarks: "",
+        expectedEndDate: "",
+        assignedTo: [],
       },
     ],
     agreements: {
@@ -465,8 +467,25 @@ export default function ProjectForm() {
   const handleProjectSelect = (project) => {
     const selectedValue = projectslist.filter((item) => item._id === project);
 
+    const convertDate = (inputDate) => {
+      console.log("inputDate", inputDate);
+      const date = new Date(inputDate);
+
+      // Extract date components
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+      const year = date.getFullYear();
+
+      // Format as YYYY-MM-DD for the date input
+      const formattedDate = `${year}-${month}-${day}`;
+      console.log("formattedDate", formattedDate);
+      return formattedDate;
+    };
+
     if (selectedValue.length === 1) {
       const projectData = selectedValue[0];
+      const firstTalk = convertDate(projectData.firstTalkDate);
+      console.log("projectData", firstTalk);
 
       setSelectedProject(projectData.projectName);
       setFormData({
@@ -479,11 +498,13 @@ export default function ProjectForm() {
         projectDetails: projectData.projectDetails,
         contactPerson: projectData.contactPerson,
         contactNumber: projectData.contactNumber,
-        firstTalkDate: projectData.firstTalkDate,
+        firstTalkDate: firstTalk,  // Now in YYYY-MM-DD format
         sendEmail: projectData.sendEmail,
+        sendWhatsApp:project.sendWhatsApp
       });
     }
   };
+
 
   const handleResourceChange = (index, field, value) => {
     console.log("rohit check ", field, value);
@@ -491,7 +512,7 @@ export default function ProjectForm() {
     newResources[index] = { ...newResources[index], [field]: value };
     setFormData((prev) => ({ ...prev, resources: newResources }));
   };
-
+  console.log("formdata", formData)
   const handleAgreementChange = (agreement, field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -505,7 +526,7 @@ export default function ProjectForm() {
   const handleSubmit1 = async (e) => {
     e.preventDefault();
     if (!formData.projectName) {
-      alert("Project Name is required");
+      // alert("Project Name is required");
       return;
     }
 
@@ -539,12 +560,13 @@ export default function ProjectForm() {
 
     }
   }
+  const [checked, setChecked] = useState(false);  // Manage checked state
   return (
     <Card sx={{ maxWidth: 800, margin: "auto", mt: 4 }}>
       <ToastContainer
         position="top-right" // Positions the toasts at the top-right corner
         autoClose={5000} // Auto close after 5 seconds
-        hideProgressBar={false}
+        hideProgressBar={false} Project Creation Form
         newestOnTop={false}
         closeOnClick
         rtl={false}
@@ -554,6 +576,28 @@ export default function ProjectForm() {
       />
       <CardHeader title="Project Creation Form" />
       <CardContent>
+        <Grid container justifyContent="flex-start" spacing={2} sx={{ mb: 3 }}>
+          <Grid item>
+            <Button variant="contained" color="primary" onClick={() => setIsInterested(0)}>
+              1st Talk
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button variant="contained" color="secondary" onClick={() => setIsInterested(1)}>
+              Project Creation
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button variant="contained" color="success" onClick={() => setIsInterested(2)}>
+              Resources Planning
+            </Button>
+          </Grid>
+          <Grid item>
+            {/* <Button variant="contained" color="error" onClick={()=>setIsInterested(0)}>
+        Button 4
+      </Button> */}
+          </Grid>
+        </Grid>
         <form onSubmit={handleSubmit1}>
           <Grid container spacing={1}>
             <Grid item xs={12}>
@@ -585,11 +629,13 @@ export default function ProjectForm() {
                       resultFirstTalk: "",
                       resources: [
                         {
-                          assignedTo: [],
+                          assignedTo2: [],
                           numberOfResources: "",
                           startDate: "",
-                          expectedEndDate: "",
                           remarks: "",
+                          expectedEndDate: "",
+                          assignedTo: [],
+
                         },
                       ],
                       agreements: {
@@ -597,7 +643,7 @@ export default function ProjectForm() {
                         dsa: { checked: false, dateTime: "" },
                         nonSolicitation: { checked: false, dateTime: "" },
                       },
-                    })
+                    });
                   } else {
                     const selected = projectslist.find((project) => project.projectName === value);
                     if (selected) {
@@ -606,6 +652,7 @@ export default function ProjectForm() {
                     }
                   }
                 }}
+                disabled={isInterested === 1 || isInterested === 2} // Disable when isInterested is 1 or 2
               >
                 {/* "None" option */}
                 <MenuItem value="none">None</MenuItem>
@@ -637,22 +684,22 @@ export default function ProjectForm() {
                 <Grid item xs={12} sm={6}>
                   {/* <InputLabel id="project-type-label">Project Type</InputLabel> */}
                   <Select
-  labelId="project-type-label"
-  fullWidth
-  value={formData.projectType}
-  className="h-[40px]"
-  onChange={(e) => handleChange("projectType", e.target.value)}
-  displayEmpty
->
-  <MenuItem value="" disabled>
-    <em>Select Project Type</em>
-  </MenuItem>
-  <MenuItem value="web">Web</MenuItem>
-  <MenuItem value="mobile">Mobile</MenuItem>
-  <MenuItem value="hybrid">Hybrid</MenuItem>
-  <MenuItem value="marketing">Marketing</MenuItem>
-  <MenuItem value="other">Other</MenuItem>
-</Select>
+                    labelId="project-type-label"
+                    fullWidth
+                    value={formData.projectType}
+                    className="h-[40px]"
+                    onChange={(e) => handleChange("projectType", e.target.value)}
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      <em>Select Project Type</em>
+                    </MenuItem>
+                    <MenuItem value="web">Web</MenuItem>
+                    <MenuItem value="mobile">Mobile</MenuItem>
+                    <MenuItem value="hybrid">Hybrid</MenuItem>
+                    <MenuItem value="marketing">Marketing</MenuItem>
+                    <MenuItem value="other">Other</MenuItem>
+                  </Select>
                 </Grid>
                 {/* Rest of the form remains unchanged */}
                 <Grid item xs={12} sm={6}>
@@ -736,6 +783,7 @@ export default function ProjectForm() {
                       <Checkbox
                         checked={formData.sendEmail}
                         onChange={(e) => handleChange("sendEmail", e.target.checked)}
+                        required
                       />
                     }
                     label="Send Email to Client"
@@ -747,6 +795,7 @@ export default function ProjectForm() {
                       <Checkbox
                         checked={formData.sendWhatsApp || false}
                         onChange={(e) => handleChange("sendWhatsApp", e.target.checked)}
+                        required
                       />
                     }
                     label="Send Message on WhatsApp to Client"
@@ -763,15 +812,16 @@ export default function ProjectForm() {
                       variant="contained"
                       color="success"
                       type="submit"
-                      onClick={() =>
+                      onClick={(e) => {
                         setIsInterested(
-                          formData.projectName === '' || formData.firstTalkDate === ''
+                          formData.projectName === '' ||
+                            formData.firstTalkDate === '' ||
+                            !formData.sendWhatsApp ||
+                            !formData.sendEmail
                             ? 0
-                            : formData.projectName !== '' && formData.firstTalkDate !== ''
-                              ? 1
-                              : 2 // You can add more logic here if needed
-                        )
-                      }
+                            : 1
+                        );
+                      }}
                     >
                       Next
                     </Button>
@@ -779,175 +829,224 @@ export default function ProjectForm() {
                 </Grid>
               </>
             ) :
-             isInterested === 1 ? (
-              // When `isInterested` is 1, show the form to fill in details
-              <>
-                <Grid item xs={12}>
-                  <Typography variant="h6" sx={{ mt: 4, fontSize: "1.1rem", fontWeight: 'bold' }}>
-                    Follow-up Actions
-                  </Typography>
-                  {Object.entries(formData.agreements).map(
-                    ([agreement, { checked, dateTime }]) => (
-                      <Grid container key={agreement} alignItems="center" spacing={2}>
-                        <Grid item xs={12} sm={6} md={4}>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={checked}
-                                onChange={(e) =>
-                                  handleAgreementChange(agreement, "checked", e.target.checked)
-                                }
-                              />
-                            }
-                            label={agreement.toUpperCase()}
-                            sx={{ fontWeight: 'bold' }}
-                          />
+              isInterested === 1 ? (
+                // When `isInterested` is 1, show the form to fill in details
+                <>
+                  <Grid item xs={12}>
+                    <Typography variant="h6" sx={{ mt: 4, fontSize: "1.1rem", fontWeight: 'bold' }}>
+                      Follow-up Actions
+                    </Typography>
+                    {Object.entries(formData.agreements).map(
+                      ([agreement, { checked, dateTime }]) => (
+                        <Grid container key={agreement} alignItems="center" spacing={2}>
+                          <Grid item xs={12} sm={6} md={4}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={checked}
+                                  onChange={(e) =>
+                                    handleAgreementChange(agreement, "checked", e.target.checked)
+                                  }
+                                />
+                              }
+                              label={agreement.toUpperCase()}
+                              sx={{ fontWeight: 'bold' }}
+                              required
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={8}>
+                            <TextField
+                              fullWidth
+                              size="small"
+                              type="datetime-local"
+                              value={dateTime}
+                              onChange={(e) =>
+                                handleAgreementChange(agreement, "dateTime", e.target.value)
+                              }
+                              InputLabelProps={{ shrink: true }}
+                              sx={{ width: "100%" }}
+                            />
+                          </Grid>
                         </Grid>
-                        <Grid item xs={12} sm={6} md={8}>
-                          <TextField
-                            fullWidth
-                            size="small"
-                            type="datetime-local"
-                            value={dateTime}
-                            onChange={(e) =>
-                              handleAgreementChange(agreement, "dateTime", e.target.value)
-                            }
-                            InputLabelProps={{ shrink: true }}
-                            sx={{ width: "100%" }}
-                          />
-                        </Grid>
-                      </Grid>
-                    )
-                  )}
-                </Grid>
+                      )
+                    )}
+                  </Grid>
 
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    multiline
-                    rows={4}
-                    label="Project List"
-                    value={formData.resultFirstTalk}
-                    onChange={(e) => handleChange("resultFirstTalk", e.target.value)}
-                  />
-                </Grid>
-                {/* <Grid item xs={12} container justifyContent="flex-end" spacing={2}>
-    <Button
-      variant="contained"
-      color="primary"
-      type="button"
-      onClick={() => setIsInterested(0)}
-    >
-      Back
-    </Button>
-    <Button
-      variant="contained"
-      color="success"
-      type="submit"
-    >
-      Save
-    </Button>
-  </Grid> */}
-                <Grid item xs={12} container justifyContent="flex-end" spacing={1}>
-                  <Grid item>
-                    {/* <Button variant="contained" color="primary" type="submit">
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      multiline
+                      rows={4}
+                      label="Project List"
+                      value={formData.resultFirstTalk}
+                      onChange={(e) => handleChange("resultFirstTalk", e.target.value)}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} container justifyContent="flex-end" spacing={1}>
+                    <Grid item>
+                      {/* <Button variant="contained" color="primary" type="submit">
           Back
         </Button> */}
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      type="button"
-                      onClick={() => setIsInterested(0)}
-                    >
-                      Back
-                    </Button>
-                  </Grid>
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      color="success"
-                      type="submit"
-                      onClick={() =>
-                        setIsInterested(2)
-                      }
-                    >
-                      Next
-                    </Button>
-                  </Grid>
-                </Grid>
-              </>
-            )
-             : isInterested === 2 ? (
-              // When `isInterested` is 2, show follow-up actions or another part of the form
-              <>
-
-                <Grid item xs={12}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Resources Planning</Typography>
-                  {formData.resources.map((resource, index) => (
-                    <Grid container key={index} spacing={2}>
-                      {Object.entries(resource).map(([field, value]) => {
-                        if (field != "assignedTo") {
-                          return (
-                            <Grid item xs={12} sm={6} key={field}>
-                              <TextField
-                                fullWidth
-                                size="small"
-                                label={field.replace(/([A-Z])/g, " $1").toLowerCase()}
-                                value={value}
-                                onChange={(e) =>
-                                  handleResourceChange(index, field, e.target.value)
-                                }
-                                slotProps={{
-                                  inputLabel: { shrink: true, sx: { zIndex: 1 } },
-                                }}
-                                type={field.includes("Date") ? "date" : "text"}
-                                sx={{ width: "100%" }}
-                              />
-                            </Grid>
-                          );
-                        } else {
-                          return (
-                            <Grid item xs={12} sm={6} key={field}>
-                              <MultipleSelectChip assignTo={setChipValue} />
-                            </Grid>
-                          );
-                        }
-                      })}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        type="button"
+                        onClick={() => setIsInterested(0)}
+                      >
+                        Back
+                      </Button>
                     </Grid>
-                  ))}
-                </Grid>
+                    <Grid item>
+                      {/* <Button
+                        variant="contained"
+                        color="success"
+                        type="submit"
+                        onClick={() =>
+                          setIsInterested(2)
+                        }
+                      >
+                        Next
+                      </Button> */}
+                      <Button
+                        variant="contained"
+                        color="success"
+                        type="submit"
+                        onClick={(e) => {
+                          setIsInterested(
+                            !formData.agreements.msa.checked ||
+                              !formData.agreements.dsa.checked ||
+                              !formData.agreements.nonSolicitation.checked
+                              ? 1
+                              : 2
+                          );
+                        }}
+                      >
+                        Next
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </>
+              )
+                : isInterested === 2 ? (
+                  // When `isInterested` is 2, show follow-up actions or another part of the form
+                  <>
+                    <Grid item xs={12} sx={{ mb: 4 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 2 }}>
+                        Resources Planning
+                      </Typography>
+                      {formData.resources.map((resource, index) => (
+                        <Grid container key={index} spacing={2} sx={{ mb: 3, p: 2, borderRadius: 2, boxShadow: 1, bgcolor: 'grey.50' }}>
+                          {Object.entries(resource).map(([field, value]) => {
+                            if (field == "assignedTo2") {
+                              return (
+                                <Grid item xs={12} sm={6} key={field}>
+                                  <MultipleSelectChip assignTo={setChipValue} isMultiChips={false} />
+                                </Grid>
+                              );
+                            }
+                            else if (field == "assignedTo") {
+                              return (
+                                <Grid item xs={12} sm={6} key={field}>
+                                  <MultipleSelectChip assignTo={setChipValue} isMultiChips={true} />
+                                </Grid>
+                              );
+                            } else {
+                              return (
+                                <Grid item xs={12} sm={6} key={field}>
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    label={field.replace(/([A-Z])/g, " $1").toLowerCase()}
+                                    value={value}
+                                    onChange={(e) =>
+                                      handleResourceChange(index, field, e.target.value)
+                                    }
+                                    slotProps={{
+                                      inputLabel: { shrink: true, sx: { zIndex: 1 } },
+                                    }}
+                                    type={field.includes("Date") ? "date" : "text"}
+                                    sx={{
+                                      '& .MuiInputBase-root': {
+                                        bgcolor: 'white',
+                                        borderRadius: 1,
+                                      },
+                                      '& .MuiInputLabel-root': {
+                                        color: 'text.secondary',
+                                      }
+                                    }}
+                                  />
+                                </Grid>
 
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    multiline
-                    rows={4}
-                    label="Project List"
-                    value={formData.resultFirstTalk}
-                    onChange={(e) => handleChange("resultFirstTalk", e.target.value)}
-                  />
-                </Grid>
-                <Grid item xs={12} container justifyContent="flex-end" spacing={2}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    type="button"
-                    onClick={() => setIsInterested(1)}
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="success"
-                    type="submit"
-                  >
-                    Save
-                  </Button>
-                </Grid>
-              </>
-            ) : null}
+                              );
+                            }
+                          })}
+                        </Grid>
+                      ))}
+                    </Grid>
+
+                    <Grid item xs={12} sx={{ mb: 4 }}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        multiline
+                        rows={4}
+                        label="Project List"
+                        value={formData.resultFirstTalk}
+                        onChange={(e) => handleChange("resultFirstTalk", e.target.value)}
+                        sx={{
+                          '& .MuiInputBase-root': {
+                            bgcolor: 'white',
+                            borderRadius: 1,
+                            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+                          },
+                          '& .MuiInputLabel-root': {
+                            color: 'text.secondary',
+                          }
+                        }}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12} container justifyContent="flex-end" spacing={2} sx={{ mt: 2 }}>
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          type="button"
+                          onClick={() => setIsInterested(1)}
+                          sx={{
+                            bgcolor: 'primary.600',
+                            '&:hover': { bgcolor: 'grey.800' },
+                            mr: 1,
+                            px: 4,
+                          }}
+                        >
+                          Back
+                        </Button>
+                      </Grid>
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          type="submit"
+                          onClick={() => router.push('/dashboard')}
+                          sx={{
+                            bgcolor: 'sucess.main',
+                            '&:hover': { bgcolor: 'primary.dark' },
+                            px: 4,
+                          }}
+                        >
+
+                          Save
+
+
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </>
+
+                ) : null}
           </Grid>
         </form>
       </CardContent>

@@ -1,7 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react';
 import Header from '@/components/Haader';
+import { Button, Menu, MenuItem } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import useRouter from 'next/router';
 import { 
   faTachometerAlt, 
   faUser, 
@@ -11,7 +13,8 @@ import {
   faChevronDown,
   faBuilding,
   faProjectDiagram,
-  faCalendarAlt
+  faCalendarAlt,
+  faClock
 } from '@fortawesome/free-solid-svg-icons';
 import { Toaster } from 'react-hot-toast';
 
@@ -21,6 +24,7 @@ const menuOptions = [
   { label: 'Leaves', icon: faCalendarAlt, url: '/leaves' },
   { label: 'Employee', icon: faUser, url: '/employee' },
   { label: 'Project Tracker', icon: faProjectDiagram, url: '/projectList' },
+  { label: 'Attendance', icon: faClock, url: '#', hasDropdown: true },
   { label: 'Logout', icon: faSignOutAlt, url: '/' },
 ];
 
@@ -31,18 +35,35 @@ const profileDropdownOptions = [
   { label: 'EIC Doc', url: '/attritions' },
 ];
 
+const attendanceDropdownOptions = [
+  { label: 'My Attendance', url: '/Attandance/myattandance' },
+  { label: 'View Attendance', url: '/Attandance/viewattandance' },
+];
+
 export default function RootLayout({ children }) {
+
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [currentPath, setCurrentPath] = useState('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isAttendanceDropdownOpen, setIsAttendanceDropdownOpen] = useState(false);
 
   useEffect(() => {
     setCurrentPath(window.location.pathname);
   }, []);
 
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Mobile Menu Overlay */}
       {!isMenuOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-20 lg:hidden"
@@ -50,7 +71,6 @@ export default function RootLayout({ children }) {
         />
       )}
 
-      {/* Sidebar */}
       <aside 
         className={`
           fixed lg:static inset-y-0 left-0 z-30
@@ -60,7 +80,6 @@ export default function RootLayout({ children }) {
           ${isMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-        {/* Logo Section */}
         <div className="flex items-center h-20 px-6 border-b border-slate-700/50">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -75,7 +94,6 @@ export default function RootLayout({ children }) {
           </div>
         </div>
 
-        {/* Navigation */}
         <nav className="px-4 mt-8 space-y-2">
           {menuOptions.map((option, index) => {
             const isActive = currentPath === option.url;
@@ -84,7 +102,11 @@ export default function RootLayout({ children }) {
               return (
                 <div key={index} className="relative">
                   <button
-                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    onClick={() => 
+                      option.label === 'HRIS' 
+                        ? setIsProfileDropdownOpen(!isProfileDropdownOpen)
+                        : setIsAttendanceDropdownOpen(!isAttendanceDropdownOpen)
+                    }
                     className={`
                       w-full flex items-center justify-between px-4 py-3 text-sm rounded-xl
                       transition-all duration-200 group
@@ -101,12 +123,30 @@ export default function RootLayout({ children }) {
                     </div>
                     <FontAwesomeIcon 
                       icon={faChevronDown} 
-                      className={`w-4 h-4 transition-transform duration-200 ${isProfileDropdownOpen ? 'rotate-180' : ''}`}
+                      className={`w-4 h-4 transition-transform duration-200 ${
+                        (option.label === 'HRIS' && isProfileDropdownOpen) || 
+                        (option.label === 'Attendance' && isAttendanceDropdownOpen) 
+                          ? 'rotate-180' : ''
+                      }`}
                     />
                   </button>
-                  {isProfileDropdownOpen && (
+                  {option.label === 'HRIS' && isProfileDropdownOpen && (
                     <div className="mt-2 ml-4 py-2 px-3 bg-white/5 rounded-xl backdrop-blur-sm">
                       {profileDropdownOptions.map((dropdownOption, dropdownIndex) => (
+                        <a
+                          key={dropdownIndex}
+                          href={dropdownOption.url}
+                          className="flex items-center px-3 py-2 text-sm text-gray-300 rounded-lg hover:bg-white/5 hover:text-white transition-colors duration-200"
+                        >
+                          <span className="w-2 h-2 bg-indigo-500 rounded-full mr-3"></span>
+                          {dropdownOption.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {option.label === 'Attendance' && isAttendanceDropdownOpen && (
+                    <div className="mt-2 ml-4 py-2 px-3 bg-white/5 rounded-xl backdrop-blur-sm">
+                      {attendanceDropdownOptions.map((dropdownOption, dropdownIndex) => (
                         <a
                           key={dropdownIndex}
                           href={dropdownOption.url}
@@ -142,14 +182,9 @@ export default function RootLayout({ children }) {
             );
           })}
         </nav>
-
-        {/* Sidebar Footer */}
-      
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
-        {/* Top Header */}
         <header className="h-20 bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700/50 shadow-lg">
           <div className="h-full px-6 flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -162,16 +197,35 @@ export default function RootLayout({ children }) {
               <Header />
             </div>
             
-            {/* Quick Actions */}
-            <div className="flex items-center space-x-2">
+            {/* <div className="flex items-center space-x-2">
               <button className="px-4 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors duration-200">
                 Quick Action
               </button>
-            </div>
+            </div> */}
+            <div>
+      <Button
+        aria-controls={open ? 'custom-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={handleClick}
+        variant="contained"
+      >
+          Quick Action
+      </Button>
+      <Menu
+        id="custom-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+      >
+        <MenuItem onClick={handleClose}>profile</MenuItem>
+        <MenuItem onClick={handleClose}>Logout</MenuItem>
+        <MenuItem onClick={()=> router.push('/dashbord')}>Option 3</MenuItem>
+      </Menu>
+    </div>
           </div>
         </header>
 
-        {/* Page Content */}
         <div className="flex-1 p-6 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             {children}
