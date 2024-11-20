@@ -31,11 +31,13 @@ export default function AttendancePage() {
     try {
       const authToken = localStorage.getItem('auth-token')
       const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {}
-      const url = `https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/totalDuration?startDate=${start}&endDate=${end}&userId=${employeeId}`
+      const url = `https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/totalDuration?startDate=${start}&endDate=${end}&userid=${employeeId}`
       const response = await axios.get(url, { headers })
+      console.log("res", response)
       setAttendances(response.data.attendances || [])
     } catch (error) {
-      console.error(error)
+      console.error("error",error)
+      setAttendances(error || [])
     }
   }
 

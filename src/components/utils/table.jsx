@@ -2,6 +2,7 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ProjectDetailsModal from './ProjectDetailsModal';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Typography, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
@@ -12,6 +13,7 @@ import { Visibility, Edit, Delete, Pause } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 
 export const UserTable = ({ data }) => {
+
   return (
     <TableContainer component={Paper}>
       <Table>
@@ -205,6 +207,7 @@ const options = {
 
 export const ProjectListTable = ({ projectData, onViewDetails, onDeleteProject, handleStatusChange, value }) => {
   const [isMounted, setIsMounted] = useState(false);
+  const [open, setOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -270,9 +273,13 @@ export const ProjectListTable = ({ projectData, onViewDetails, onDeleteProject, 
               </TableCell>
               <TableCell align="right" sx={{ border: '1px solid #ddd', width: '120px' }}>
                 <div className="flex justify-around">
-                  {/* <IconButton color="primary" size="small" onClick={() => onViewDetails(project)}>
+                  <IconButton color="primary" size="small" onClick={() => setOpen(true)}>
                     <Visibility />
-                  </IconButton> */}
+                  </IconButton>
+
+                  {/* Render the modal and pass the required props */}
+                  <ProjectDetailsModal open={open} setOpen={() =>{ setOpen() }} projectName1={project.projectName} />
+
                   <IconButton color="error" size="small" onClick={() => onDeleteProject(project)}>
                     <Delete />
                   </IconButton>
