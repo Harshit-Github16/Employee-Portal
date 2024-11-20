@@ -11,6 +11,7 @@ import moment from 'moment';
 import { styled } from '@mui/material/styles';
 import { Visibility, Edit, Delete, Pause } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
+import DialogBox from './projectModel';
 
 export const UserTable = ({ data }) => {
 
@@ -207,8 +208,11 @@ const options = {
 
 export const ProjectListTable = ({ projectData, onViewDetails, onDeleteProject, handleStatusChange, value }) => {
   const [isMounted, setIsMounted] = useState(false);
-  const [open, setOpen] = useState(false);
   const router = useRouter();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const openDialog = () => setIsDialogOpen(true);
+  const closeDialog = () => setIsDialogOpen(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -273,13 +277,11 @@ export const ProjectListTable = ({ projectData, onViewDetails, onDeleteProject, 
               </TableCell>
               <TableCell align="right" sx={{ border: '1px solid #ddd', width: '120px' }}>
                 <div className="flex justify-around">
-                  <IconButton color="primary" size="small" onClick={() => setOpen(true)}>
+                  <IconButton color="primary" size="small"   onClick={openDialog}>
                     <Visibility />
                   </IconButton>
-
-                  {/* Render the modal and pass the required props */}
-                  <ProjectDetailsModal open={open} setOpen={() =>{ setOpen() }} projectName1={project.projectName} />
-
+      {/* DialogBox Component */}
+      <DialogBox isOpen={isDialogOpen} onClose={closeDialog} />
                   <IconButton color="error" size="small" onClick={() => onDeleteProject(project)}>
                     <Delete />
                   </IconButton>
