@@ -105,6 +105,9 @@ export default function AttendancePage() {
   const totalWorkingHours = attendances.reduce((total, attendance) => {
     const totalDuration = attendance.totalDuration;
     function convertToSeconds(duration) {
+      if (!duration) {
+        duration = "00:00:00";
+      }
       const [hours, minutes, seconds] = duration.split(":").map(Number);
       return (hours * 3600) + (minutes * 60) + seconds;
     }
@@ -115,25 +118,19 @@ export default function AttendancePage() {
 
 
   function convertSecondsToHMS(seconds) {
-    const hours = Math.floor(seconds / 3600); // Get the full hours
-    const minutes = Math.floor((seconds % 3600) / 60); // Get the remaining minutes
-    const remainingSeconds = seconds % 60; // Get the remaining seconds
+    const hours = Math.floor(seconds / 3600); 
+    const minutes = Math.floor((seconds % 3600) / 60); 
+    const remainingSeconds = seconds % 60; 
 
     return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
   }
-  console.log("totalWorkingHours", totalWorkingHours)
   const tester = convertSecondsToHMS(totalWorkingHours)
-
   // Convert 9:30 hours to seconds
-  const nineThirtyInSeconds = (9 * 3600) + (30 * 60); // 9 hours and 30 minutes in seconds
-
+  const nineThirtyInSeconds = (9 * 3600) + (30 * 60);
   // Multiply totalWorkingHours by 9:30 (in seconds)
   const multipliedTimeInSeconds = totalWorkingHours * nineThirtyInSeconds;
-
   // Convert the result back to HH:MM:SS format
   const resultTime = convertSecondsToHMS(multipliedTimeInSeconds);
-  console.log("resultTime", resultTime)
-
   // Function to format the time as HH:MM (12-hour format)
   const formatTime = (dateString) => {
     const date = new Date(dateString);
@@ -146,9 +143,7 @@ export default function AttendancePage() {
     return `${formattedHours}:${formattedMinutes} ${suffix}`;
   }
 
-
-
-  // const [open, setOpen] = useState(false);
+ 
   const [attendances1, setAttendances1] = useState([
     {
       date: '',
@@ -156,44 +151,24 @@ export default function AttendancePage() {
       logoutTime: '',
       status: '',
     },
-    // Example data, you can add more rows dynamically
   ]);
 
-  // Function to handle opening the dialog
-  const handleClickOpen = (checkIn, checkout) => {
+ 
+  const handleClickOpen = (date, checkIn, checkout) => {
     setOpen(true)
     console.log(checkIn, checkout)
     setAttendances1({
-      date: '2024-11-10',
+      date: date,
       loginTime: checkIn,
       logoutTime: checkout,
       status: 'in',
     })
   }
 
-  // Function to handle closing the dialog
-  const handleClose = () => {
 
+  const handleClose = () => {
     setOpen(false)
   }
-
-  // const handleClickOpen = () => setOpen(true);
-  // const handleClose = () => setOpen(false);
-
-  // const handleApply = (newAttendance) => {
-  //   setAttendances1([
-  //     ...attendances1,
-  //     {
-  //       date: new Date().toLocaleDateString(),
-  //       loginTime: newAttendance.loginTime,
-  //       logoutTime: newAttendance.logoutTime,
-  //       status: newAttendance.status,
-  //     },
-  //   ]);
-  // };
-
-
-  // Handle changes in the input fields
   const handleLoginTimeChange = (e) => {
     setAttendances1({ ...attendances1, loginTime: e.target.value });
   };
@@ -206,12 +181,41 @@ export default function AttendancePage() {
     setAttendances1({ ...attendances1, status: e.target.value });
   };
 
-  // Handle form submission (when "Apply" is clicked)
-  const handleFormSubmit = () => {
-    handleSubmit(attendances1); // Pass the updated attendance data to the parent
-    handleClose(); // Close the dialog after submitting
-  };
 
+  const handleFormSubmit = () => {
+    handleSubmitRequest();
+    handleSubmit(attendances1);
+    handleClose();
+  };
+  const handleSubmitRequest = async () => {
+    try {
+      const formatTimeToHHMMSS = (time) => {
+        const sanitizedTime = time.replace(/\s+/g, '');
+        const [hours, minutes] = sanitizedTime.split(':');
+        const seconds = "00";
+        return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:${seconds}`;
+      };
+
+      const formattedCheckIn = formatTimeToHHMMSS(attendances1.loginTime);
+      const formattedCheckOut = formatTimeToHHMMSS(attendances1.logoutTime);
+      const authToken = localStorage.getItem('auth-token');
+      const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+      const data = {
+        date: attendances1.date,
+        checkIn: formattedCheckIn,
+        checkOut: formattedCheckOut,
+      };
+      // Send the POST request to the API
+      const response = await axios.post('https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/requestChange', data, { headers });
+      if (response.status === 201) {
+        handleClose();
+      } else {
+        console.error('Request failed:', response.data);
+      }
+    } catch (error) {
+      console.error('Error occurred during API request:', error);
+    }
+  };
 
   const [open1, setOpen1] = React.useState(1);
 
@@ -325,6 +329,7 @@ export default function AttendancePage() {
                   <TableCell className="p-4 border-b">
                     <Button variant="outlined"
                       onClick={() => handleClickOpen(
+                        attendance.date,
                         formatTime(attendance.sessions[0].checkIn),
                         formatTime(attendance.sessions[attendance.sessions.length - 1].checkOut)
                       )} >Regularise</Button>
@@ -343,7 +348,10 @@ export default function AttendancePage() {
                               <DialogTitle className="text-xl font-semibold mb-4">Regularise Attendance</DialogTitle>
                               <div className="space-y-4">
                                 {/* Status Dropdown */}
+
+                                <InputLabel></InputLabel>
                                 <FormControl fullWidth margin="normal">
+
                                   <InputLabel>Status</InputLabel>
                                   <Select
                                     value={attendances1.status}
@@ -386,7 +394,7 @@ export default function AttendancePage() {
                                   <Button onClick={handleClose} color="secondary" className="py-2 px-6 rounded-md bg-gray-300 hover:bg-gray-400 text-sm">
                                     Cancel
                                   </Button>
-                                  <Button onClick={handleSubmit} color="primary" className="py-2 px-6 rounded-md bg-blue-500 hover:bg-blue-600 text-sm text-white">
+                                  <Button onClick={handleFormSubmit} color="primary" className="py-2 px-6 rounded-md bg-blue-500 hover:bg-blue-600 text-sm text-white">
                                     Apply
                                   </Button>
                                 </DialogActions>

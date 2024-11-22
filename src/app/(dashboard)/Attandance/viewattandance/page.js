@@ -84,11 +84,11 @@ export default function AttendancePage() {
     // Example data, you can add more rows dynamically
   ]);
     // Function to handle opening the dialog
-    const handleClickOpen = (checkIn, checkout) => {
+    const handleClickOpen = (date,checkIn, checkout) => {
       setOpen(true)
       console.log(checkIn, checkout)
       setAttendances1({
-        date: '2024-11-10',
+        date: date,
         loginTime: checkIn,
         logoutTime: checkout,
         status: 'both',
@@ -116,10 +116,39 @@ export default function AttendancePage() {
 
   // Handle form submission (when "Apply" is clicked)
   const handleFormSubmit = () => {
+    handleSubmitRequest()
     handleSubmit(attendances1); // Pass the updated attendance data to the parent
     handleClose(); // Close the dialog after submitting
   };  
-  
+  const handleSubmitRequest = async () => {
+    try {
+      const formatTimeToHHMMSS = (time) => {
+        const sanitizedTime = time.replace(/\s+/g, '');
+        const [hours, minutes] = sanitizedTime.split(':');
+        const seconds = "00";
+        return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:${seconds}`;
+      };
+
+      const formattedCheckIn = formatTimeToHHMMSS(attendances1.loginTime);
+      const formattedCheckOut = formatTimeToHHMMSS(attendances1.logoutTime);
+      const authToken = localStorage.getItem('auth-token');
+      const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+      const data = {
+        date: attendances1.date,
+        checkIn: formattedCheckIn,
+        checkOut: formattedCheckOut,
+      };
+      // Send the POST request to the API
+      const response = await axios.post('https://1pqbgqn7-4000.inc1.devtunnels.ms/Employee/requestChange', data, { headers });
+      if (response.status === 201) {
+        handleClose();
+      } else {
+        console.error('Request failed:', response.data);
+      }
+    } catch (error) {
+      console.error('Error occurred during API request:', error);
+    }
+  };
 
   return (
     <Container maxWidth="lg" className="bg-white p-8 rounded-lg shadow-lg">
@@ -226,6 +255,7 @@ export default function AttendancePage() {
                   <TableCell className="p-4 border-b">
                   <Button variant="outlined"
                       onClick={() => handleClickOpen(
+                        attendance.date,
                         formatTime(attendance.sessions[0].checkIn),
                         formatTime(attendance.sessions[attendance.sessions.length - 1].checkOut)
                       )} >Regularise</Button>
@@ -286,7 +316,7 @@ export default function AttendancePage() {
                                   <Button onClick={handleClose} color="secondary" className="py-2 px-6 rounded-md bg-gray-300 hover:bg-gray-400 text-sm">
                                     Cancel
                                   </Button>
-                                  <Button onClick={handleSubmit} color="primary" className="py-2 px-6 rounded-md bg-blue-500 hover:bg-blue-600 text-sm text-white">
+                                  <Button onClick={handleFormSubmit} color="primary" className="py-2 px-6 rounded-md bg-blue-500 hover:bg-blue-600 text-sm text-white">
                                     Apply
                                   </Button>
                                 </DialogActions>

@@ -1,8 +1,9 @@
 // components/UserTable.js
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import ProjectDetailsModal from './ProjectDetailsModal';
+// import { MultiStepFormModal } from './projectModel';
+import MultiStepFormModal from './projectModel';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Typography, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
@@ -206,19 +207,20 @@ const options = {
   5: "Hold Not Complete",
 };
 
-export const ProjectListTable = ({ projectData, onViewDetails, onDeleteProject, handleStatusChange, value }) => {
-  const [isMounted, setIsMounted] = useState(false);
-  const router = useRouter();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+export const ProjectListTable = ({ projectData, onViewDetails, onDeleteProject, handleStatusChange }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);  // Track selected project for modal
 
-  const openDialog = () => setIsDialogOpen(true);
-  const closeDialog = () => setIsDialogOpen(false);
-
-  useEffect(() => {
-    setIsMounted(true);
+  // Open modal when needed
+  const openModal = useCallback((project) => {
+    setSelectedProject(project);
+    setIsModalOpen(true);
   }, []);
 
-  if (!isMounted) return null; // Prevents render until mounted on client side
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedProject(null);  // Clear selected project
+  }, []);
 
   return (
     <TableContainer component={Paper} className="w-full shadow-lg p-4">
@@ -260,12 +262,10 @@ export const ProjectListTable = ({ projectData, onViewDetails, onDeleteProject, 
               <TableCell align="right">
                 <FormControl variant="outlined" size="small" fullWidth>
                   <InputLabel id="view-label">view</InputLabel>
-                  {/* {console.log("ssss",project.projectStatus)} */}
                   <Select
                     labelId="view-label"
-                    // value={project.projectStatus}
+                    value={project.projectStatus || 1}
                     onChange={(event) => handleStatusChange(event, project)}
-                    label={options[project.projectStatus]}
                   >
                     <MenuItem value={1}>Initial</MenuItem>
                     <MenuItem value={2}>Planning</MenuItem>
@@ -277,11 +277,10 @@ export const ProjectListTable = ({ projectData, onViewDetails, onDeleteProject, 
               </TableCell>
               <TableCell align="right" sx={{ border: '1px solid #ddd', width: '120px' }}>
                 <div className="flex justify-around">
-                  <IconButton color="primary" size="small"   onClick={openDialog}>
+                  <IconButton color="primary" size="small" onClick={() => openModal(project)}>
+                    {/* <Button>Open Form</Button> */}
                     <Visibility />
                   </IconButton>
-      {/* DialogBox Component */}
-      <DialogBox isOpen={isDialogOpen} onClose={closeDialog} />
                   <IconButton color="error" size="small" onClick={() => onDeleteProject(project)}>
                     <Delete />
                   </IconButton>
@@ -291,6 +290,26 @@ export const ProjectListTable = ({ projectData, onViewDetails, onDeleteProject, 
           ))}
         </TableBody>
       </Table>
+
+      {/* Modal for project details */}
+      {/* <MultiStepFormModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        selectedProject={selectedProject}
+      /> */}
+      <MultiStepFormModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        selectedProject={selectedProject}
+        projectId={selectedProject?._id}       // Send projectId
+        projectName={selectedProject?.projectName} // Send projectName
+      />
     </TableContainer>
   );
 };
+
+
+
+
+
+
